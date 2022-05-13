@@ -21,7 +21,9 @@ router.post('/signup', (req, res, next) => {
           _id: nanoid(16),
           name: req.body.name,
           email: req.body.email,
-          password: hash
+          password: hash,
+          my_plant: [],
+          satisfaction_rate: 0
         };
 
         Users.push(newUser);
