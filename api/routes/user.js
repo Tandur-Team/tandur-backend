@@ -3,6 +3,8 @@ const router = express.Router();
 const { nanoid } = require('nanoid');
 const Users = require('../models/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const checkAuth = require('../middleware/check-auth');
 
 // REGISTER/SIGNUP
 router.post('/signup', (req, res, next) => {
@@ -37,12 +39,63 @@ router.post('/signup', (req, res, next) => {
   }
 });
 
+router.post('/login', (req, res, next) => {
+  const user = Users.find(user => user.email == req.body.email)
+  if (user !== undefined) {
+    bcrypt.compare(req.body.password, user.password, (err, result) => {
+      if (err) {
+        return res.status(401).json({
+          message: 'Auth Failed'
+        });
+      }
+      if (result) {
+        const token = jwt.sign(
+          {
+            email: user.email,
+            userId: user._id
+          },
+          process.env.JWT_KEY,
+          {
+
+          }
+        );
+        return res.status(200).json({
+          message: 'Auth Success',
+          token: token
+        });
+      }
+      return res.status(401).json({
+        message: 'Auth Failed: Password is Incorrect!'
+      });
+    });
+  } else {
+    return res.status(401).json({
+      message: 'Auth Failed: Email is Incorrect'
+    });
+  }
+});
+
 // GET ALL USER
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
   res.status(200).json({
     message: 'Users fetched',
     data: Users
   });
+});
+
+router.get('/:userId', checkAuth, (req, res, next) => {
+  const user = Users.find(user => user._id == req.params.userId)
+  if (user !== undefined) {
+    return res.status(200).json({
+      message: 'User Found',
+      data: user
+    });
+  } else {
+    return res.status(404).json({
+      message: 'User not Found'
+    });
+  }
+
 });
 
 module.exports = router;
