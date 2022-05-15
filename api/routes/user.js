@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { nanoid } = require('nanoid');
 const Users = require('../models/user');
+const Plants = require('../models/plant');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const checkAuth = require('../middleware/check-auth');
 
 // REGISTER/SIGNUP
 router.post('/signup', (req, res, next) => {
-  const user = Users.find(user => user.email == req.body.email)
+  const user = Users.find(user => user.email == req.body.email);
   if (user !== undefined) {
     return res.status(409).json({
       message: 'Email already exists'
@@ -42,7 +43,7 @@ router.post('/signup', (req, res, next) => {
 
 // LOGIN
 router.post('/login', (req, res, next) => {
-  const user = Users.find(user => user.email == req.body.email)
+  const user = Users.find(user => user.email == req.body.email);
   if (user !== undefined) {
     bcrypt.compare(req.body.password, user.password, (err, result) => {
       if (err) {
@@ -87,7 +88,7 @@ router.get('/', checkAuth, (req, res, next) => {
 
 // GET USER BY ID (USER DETAIL)
 router.get('/:userId', checkAuth, (req, res, next) => {
-  const user = Users.find(user => user._id == req.params.userId)
+  const user = Users.find(user => user._id == req.params.userId);
   if (user !== undefined) {
     return res.status(200).json({
       message: 'User Found',
@@ -98,7 +99,57 @@ router.get('/:userId', checkAuth, (req, res, next) => {
       message: 'User not Found'
     });
   }
+});
 
+// ADD MY PLANT
+router.post('/:userId/plant', (req, res, next) => {
+  const user = Users.find(user => user._id == req.params.userId);
+  if (user !== undefined) {
+    const plantId = nanoid(16);
+
+    const myPlant = {
+      _id: plantId,
+      plant_url: `localhost:3000/user/${req.params.userId}/plant`
+    };
+
+    const newPlant = {
+      _id: plantId,
+      name: req.body.plant_name,
+      plant_date: req.body.plant_date,
+      harvest_date: req.body.harvest_date,
+      location: req.body.location,
+      rain: req.body.rain,
+      temperature: req.body.temperature,
+      soil_ph: req.body.soil_ph
+    };
+
+    user.my_plant.push(myPlant);
+    Plants.push(newPlant);
+
+    return res.status(201).json({
+      message: 'Plant added',
+      data: user.my_plant
+    });
+  } else {
+    return res.status(404).json({
+      message: 'User not Found'
+    });
+  }
+});
+
+// GET ALL MY PLANT
+router.get('/:userId/plant', (req, res, next) => {
+  const user = Users.find(user => user._id == req.params.userId);
+  if (user !== undefined) {
+    res.status(200).json({
+      message: 'My plants fetched',
+      data: user.my_plant
+    });
+  } else {
+    return res.status(404).json({
+      message: 'User not Found'
+    });
+  }
 });
 
 module.exports = router;
