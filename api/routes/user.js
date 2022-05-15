@@ -8,7 +8,8 @@ const checkAuth = require('../middleware/check-auth');
 
 // REGISTER/SIGNUP
 router.post('/signup', (req, res, next) => {
-  if (Users.find(user => user.email == req.body.email) !== undefined) {
+  const user = Users.find(user => user.email == req.body.email)
+  if (user !== undefined) {
     return res.status(409).json({
       message: 'Email already exists'
     });
@@ -39,6 +40,7 @@ router.post('/signup', (req, res, next) => {
   }
 });
 
+// LOGIN
 router.post('/login', (req, res, next) => {
   const user = Users.find(user => user.email == req.body.email)
   if (user !== undefined) {
@@ -83,6 +85,7 @@ router.get('/', checkAuth, (req, res, next) => {
   });
 });
 
+// GET USER BY ID (USER DETAIL)
 router.get('/:userId', checkAuth, (req, res, next) => {
   const user = Users.find(user => user._id == req.params.userId)
   if (user !== undefined) {
