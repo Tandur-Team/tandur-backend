@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
 const userRoutes = require('./api/routes/user');
+const plantRoutes = require('./api/routes/plant');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 
 // Routing
 app.use('/user', userRoutes);
+app.use('/plant', plantRoutes);
 
 // Custom error
 app.use((req, res, next) => {
