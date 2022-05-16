@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const checkAuth = require('../middleware/check-auth');
 
+<<<<<<< HEAD
 // REGISTER/SIGNUP
 router.post('/signup', (req, res, next) => {
   const user = Users.find(user => user.email == req.body.email)
@@ -100,5 +101,14 @@ router.get('/:userId', checkAuth, (req, res, next) => {
   }
 
 });
+=======
+router.post('/signup', UserController.user_signup);
+
+router.post('/login', UserController.user_login);
+
+router.get('/', checkAuth, UserController.user_get_all);
+
+router.get('/:userId', checkAuth, UserController.user_get_detail);
+>>>>>>> parent of 13e6576 (Merge branch 'master' into user-auth)
 
 module.exports = router;
