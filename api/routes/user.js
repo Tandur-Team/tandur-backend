@@ -102,7 +102,7 @@ router.get('/:userId', checkAuth, (req, res, next) => {
 });
 
 // ADD MY PLANT
-router.post('/:userId/plant', (req, res, next) => {
+router.post('/:userId/plant', checkAuth, (req, res, next) => {
   const user = Users.find(user => user._id == req.params.userId);
   if (user !== undefined) {
 
@@ -134,7 +134,7 @@ router.post('/:userId/plant', (req, res, next) => {
 });
 
 // GET ALL MY PLANT
-router.get('/:userId/plant', (req, res, next) => {
+router.get('/:userId/plant', checkAuth, (req, res, next) => {
   const user = Users.find(user => user._id == req.params.userId);
   if (user !== undefined) {
     res.status(200).json({
@@ -149,7 +149,7 @@ router.get('/:userId/plant', (req, res, next) => {
 });
 
 // HARVEST MY PLANT
-router.patch('/:userId/plant/:plantId', (req, res, next) => {
+router.patch('/:userId/plant/:plantId', checkAuth, (req, res, next) => {
   const user = Users.find(user => user._id == req.params.userId);
   if (user !== undefined) {
     const plant = Plants.find(plant => plant._id == req.params.plantId);
