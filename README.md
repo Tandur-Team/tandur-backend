@@ -6,8 +6,14 @@
 4. Run "npm run start" to start the server
 
 ## API Endpoint (LOCAL)
-- Register: ip:3000/user/signup
-- Login: ip:3000/user/login
-- User Detail: ip:3000/user/{userId}
+- Register: POST ip:port/user/signup
+- Login: POST ip:port/user/login
+- User Detail: GET ip:port/user/{userId}
+- Add MyPlant: POST ip:port/user/{userId}/plant
+- Get All MyPlants: GET ip:port/user/{userId}/plant
+- Harvest MyPlant: PATCH ip:port/user/{userId}/plant/{plantId}
+- Get All Plants: GET ip:port/plant
+- Get Plant Detail: GET ip:port/plant/{plantId}
 
 *ip = your PC IPv4 address*
+*port = 3000*
