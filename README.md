@@ -15,5 +15,5 @@
 - Get All Plants: **GET** ip:port/plant
 - Get Plant Detail: **GET** ip:port/plant/{plantId}
 
-*ip = your PC IPv4 address*
+*ip = your PC IPv4 address*</br>
 *port = 3000*
