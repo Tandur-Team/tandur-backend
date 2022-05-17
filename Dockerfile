@@ -1,4 +1,4 @@
-FROM node:16.14
+FROM node:13-slim
 
 RUN npm install
 
