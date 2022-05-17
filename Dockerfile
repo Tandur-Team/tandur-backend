@@ -1,10 +1,9 @@
 FROM node:14
 
-WORKDIR /app
-
 RUN npm install
+
+WORKDIR /app
 
 ADD . /app
 
-EXPOSE 8080
 CMD [ "node", "server.js" ]
