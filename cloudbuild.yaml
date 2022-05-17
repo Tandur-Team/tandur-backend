@@ -2,6 +2,22 @@ steps:
 - name: node:10.15.1
   entrypoint: npm
   args: ["install"]
-- name: "gcr.io/cloud-builders/gcloud"
-  args: ["app", "deploy"]
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr/io/$PROJECT_ID/tandur-backend', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr/io/$PROJECT_ID/tandur-backend']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [
+    'beta', 
+    'run', 
+    'deploy', 
+    'tandur-backend',
+    '--image',
+    'gcr/io/$PROJECT_ID/tandur-backend',
+    '--region',
+    'asia-southeast2'
+    '--platform',
+    'managed',
+    '--allow-unauthenticated'
+    ]
 timeout: "1600s"
