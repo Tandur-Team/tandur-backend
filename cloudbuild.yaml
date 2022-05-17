@@ -20,4 +20,5 @@ steps:
     'managed',
     '--allow-unauthenticated'
     ]
-timeout: "1600s"
+images:
+- gcr.io/$PROJECT_ID/myimage
