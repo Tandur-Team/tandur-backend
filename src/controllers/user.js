@@ -105,9 +105,21 @@ exports.user_login = (req, res, next) => {
 
 // GET ALL USERS
 exports.user_get_all = (req, res, next) => {
-  res.status(200).json({
-    message: 'Users fetched',
-    data: Users
+  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user'
+  connection.query(queryCheckUser, (err, rows, field) => {
+    if (err) {
+      return res.status(500).json({
+        message: 'Failed',
+        error: err
+      });
+    }
+
+    if (rows) {
+      return res.status(200).json({
+        message: 'Users fetched',
+        data: rows
+      });
+    }
   });
 };
 
