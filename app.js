@@ -3,8 +3,8 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
-const userRoutes = require('./api/routes/user');
-const plantRoutes = require('./api/routes/plant');
+const userRoutes = require('./src/routes/user');
+const plantRoutes = require('./src/routes/plant');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
