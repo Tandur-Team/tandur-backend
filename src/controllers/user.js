@@ -84,10 +84,7 @@ exports.user_login = (req, res, next) => {
               email: userData.email,
               userId: userData._id
             },
-            process.env.JWT_KEY,
-            {
-
-            }
+            process.env.JWT_KEY
           );
           return res.status(200).json({
             message: 'Auth Success',
@@ -125,17 +122,26 @@ exports.user_get_all = (req, res, next) => {
 
 // GET USER BY ID (USER DETAIL)
 exports.user_get_detail = (req, res, next) => {
-  const user = Users.find(user => user._id == req.params.userId)
-  if (user !== undefined) {
-    return res.status(200).json({
-      message: 'User Found',
-      data: user
-    });
-  } else {
-    return res.status(404).json({
-      message: 'User not Found'
-    });
-  }
+  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user WHERE _id = ?'
+  connection.query(queryCheckUser, req.params.userId, (err, rows, field) => {
+    if (err) {
+      return res.status(500).json({
+        message: 'Failed',
+        error: err
+      });
+    }
+    if (rows.length > 1) {
+      return res.status(200).json({
+        message: 'User Found',
+        data: rows[0]
+      });
+    } else {
+      return res.status(404).json({
+        message: 'User not Found'
+      });
+    }
+  });
+  
 };
 
 // ADD MY PLANT
