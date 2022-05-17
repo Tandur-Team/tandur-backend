@@ -1,9 +1,6 @@
 steps:
-- name: node:10.15.1
-  entrypoint: npm
-  args: ["install"]
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--network=cloudbuild', '-t', 'gcr.io/$PROJECT_ID/tandur-backend', '.']
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/tandur-backend', '.']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/$PROJECT_ID/tandur-backend']
 - name: 'gcr.io/cloud-builders/gcloud'
