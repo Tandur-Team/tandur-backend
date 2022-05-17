@@ -1,7 +1,9 @@
-FROM node:16.4
+FROM node:16.14
+
+RUN npm install
 
 WORKDIR /app
 
-RUN npm install
-COPY . .
+ADD . /app
+
 CMD node server.js
