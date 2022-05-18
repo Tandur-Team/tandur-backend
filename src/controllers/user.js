@@ -7,21 +7,20 @@ const Users = require('../models/user');
 const Plants = require('../models/plant');
 
 // REGISTER/SIGNUP
-exports.user_signup = (req, res, next) => {
-  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user WHERE email = ?'
-  connection.query(queryCheckUser, req.body.email, (err, rows, field) => {
-    if (err) {
-      return res.status(500).json({
-        message: 'Failed',
-        error: err
-      });
-    }
-    if (rows.length > 0) {
+exports.user_signup = async (req, res, next) => {
+  try {
+    const user = await Users.findAll({
+      where: {
+        email: req.body.email
+      }
+    });
+
+    if (user.length > 0) {
       return res.status(409).json({
         message: 'Email already exists'
       });
     } else {
-      bcrypt.hash(req.body.password, 10, (err, hash) => {
+      bcrypt.hash(req.body.password, 10, async (err, hash) => {
         if (err) {
           return res.status(500).json({
             error: err
@@ -33,26 +32,18 @@ exports.user_signup = (req, res, next) => {
             email: req.body.email,
             password: hash,
             satisfaction_rate: 0
-          };
-
-          const queryRegister = 'INSERT INTO tandur_user SET ?';
-
-          connection.query(queryRegister, data, (err, rows, field) => {
-            if (err) {
-              return res.status(500).json({
-                message: 'Failed',
-                error: err
-              });
-            }
-            return res.status(201).json({
-              message: 'User created',
-              data: data
-            });
+          }
+          const user = await Users.create(data);
+          res.json({
+            message: 'User created',
+            data: user
           });
         }
       });
     }
-  });
+  } catch (err) {
+    res.json({ message: err.message });
+  }
 };
 
 // LOGIN
@@ -141,7 +132,7 @@ exports.user_get_detail = (req, res, next) => {
       });
     }
   });
-  
+
 };
 
 // ADD MY PLANT

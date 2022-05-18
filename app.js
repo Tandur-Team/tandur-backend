@@ -3,8 +3,16 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
+const Database = require('./src/configs/database')
 const userRoutes = require('./src/routes/user');
 const plantRoutes = require('./src/routes/plant');
+
+try {
+  Database.db.authenticate();
+  console.log('Database connected');
+} catch (err) {
+  console.error('Connection error:', err);
+}
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
