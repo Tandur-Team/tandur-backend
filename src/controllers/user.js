@@ -42,27 +42,28 @@ exports.user_signup = async (req, res, next) => {
       });
     }
   } catch (err) {
-    res.json({ message: err.message });
+    return res.status(500).json({
+      message: 'Failed',
+      error: err.message
+    });
   }
 };
 
 // LOGIN
-exports.user_login = (req, res, next) => {
-  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user WHERE email = ?'
-  connection.query(queryCheckUser, req.body.email, (err, rows, field) => {
-    if (err) {
-      return res.status(500).json({
-        message: 'Failed',
-        error: err
-      });
-    }
+exports.user_login = async (req, res, next) => {
+  try {
+    const user = await Users.findAll({
+      where: {
+        email: req.body.email
+      }
+    });
 
-    if (rows.length < 1) {
+    if (user.length < 1) {
       return res.status(401).json({
         message: 'Email not Found'
       });
     } else {
-      const userData = rows[0];
+      const userData = user[0];
       bcrypt.compare(req.body.password, userData.password, (err, result) => {
         if (err) {
           return res.status(401).json({
@@ -88,7 +89,12 @@ exports.user_login = (req, res, next) => {
         });
       });
     }
-  });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      error: err.message
+    });
+  }
 };
 
 // GET ALL USERS
