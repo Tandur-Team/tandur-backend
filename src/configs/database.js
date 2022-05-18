@@ -1,4 +1,11 @@
+const { Sequelize } = require('sequelize');
 const mysql = require("mysql");
+
+exports.db = new Sequelize('tandur_coba', 'root', '123456', {
+  host: '34.101.40.138',
+  port: '3306',
+  dialect: 'mysql'
+});
 
 // CONNECTION CONFIGURATION
 var connection = mysql.createConnection({
@@ -14,5 +21,3 @@ connection.connect((err) => {
   if (err) throw err;
   console.log('MySQL Connected');
 });
-
-module.exports = connection;

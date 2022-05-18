@@ -7,21 +7,20 @@ const Users = require('../models/user');
 const Plants = require('../models/plant');
 
 // REGISTER/SIGNUP
-exports.user_signup = (req, res, next) => {
-  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user WHERE email = ?'
-  connection.query(queryCheckUser, req.body.email, (err, rows, field) => {
-    if (err) {
-      return res.status(500).json({
-        message: 'Failed',
-        error: err
-      });
-    }
-    if (rows.length > 0) {
+exports.user_signup = async (req, res, next) => {
+  try {
+    const user = await Users.findAll({
+      where: {
+        email: req.body.email
+      }
+    });
+
+    if (user.length > 0) {
       return res.status(409).json({
         message: 'Email already exists'
       });
     } else {
-      bcrypt.hash(req.body.password, 10, (err, hash) => {
+      bcrypt.hash(req.body.password, 10, async (err, hash) => {
         if (err) {
           return res.status(500).json({
             error: err
@@ -33,45 +32,38 @@ exports.user_signup = (req, res, next) => {
             email: req.body.email,
             password: hash,
             satisfaction_rate: 0
-          };
-
-          const queryRegister = 'INSERT INTO tandur_user SET ?';
-
-          connection.query(queryRegister, data, (err, rows, field) => {
-            if (err) {
-              return res.status(500).json({
-                message: 'Failed',
-                error: err
-              });
-            }
-            return res.status(201).json({
-              message: 'User created',
-              data: data
-            });
+          }
+          const user = await Users.create(data);
+          return res.status(201).json({
+            message: 'User created',
+            data: user
           });
         }
       });
     }
-  });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      error: err.message
+    });
+  }
 };
 
 // LOGIN
-exports.user_login = (req, res, next) => {
-  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user WHERE email = ?'
-  connection.query(queryCheckUser, req.body.email, (err, rows, field) => {
-    if (err) {
-      return res.status(500).json({
-        message: 'Failed',
-        error: err
-      });
-    }
+exports.user_login = async (req, res, next) => {
+  try {
+    const user = await Users.findAll({
+      where: {
+        email: req.body.email
+      }
+    });
 
-    if (rows.length < 1) {
+    if (user.length < 1) {
       return res.status(401).json({
         message: 'Email not Found'
       });
     } else {
-      const userData = rows[0];
+      const userData = user[0];
       bcrypt.compare(req.body.password, userData.password, (err, result) => {
         if (err) {
           return res.status(401).json({
@@ -97,51 +89,58 @@ exports.user_login = (req, res, next) => {
         });
       });
     }
-  });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      error: err.message
+    });
+  }
 };
 
 // GET ALL USERS
-exports.user_get_all = (req, res, next) => {
-  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user'
-  connection.query(queryCheckUser, (err, rows, field) => {
-    if (err) {
-      return res.status(500).json({
-        message: 'Failed',
-        error: err
-      });
-    }
+exports.user_get_all = async (req, res, next) => {
+  try {
+    const user = await Users.findAll();
 
-    if (rows) {
+    if (user) {
       return res.status(200).json({
         message: 'Users fetched',
-        data: rows
+        data: user
       });
     }
-  });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      error: err.message
+    });
+  }
 };
 
 // GET USER BY ID (USER DETAIL)
-exports.user_get_detail = (req, res, next) => {
-  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user WHERE _id = ?'
-  connection.query(queryCheckUser, req.params.userId, (err, rows, field) => {
-    if (err) {
-      return res.status(500).json({
-        message: 'Failed',
-        error: err
-      });
-    }
-    if (rows.length > 1) {
+exports.user_get_detail = async (req, res, next) => {
+  try {
+    const user = await Users.findAll({
+      where: {
+        _id: req.params.userId
+      }
+    });
+
+    if (user.length > 0) {
       return res.status(200).json({
         message: 'User Found',
-        data: rows[0]
+        data: user[0]
       });
     } else {
       return res.status(404).json({
         message: 'User not Found'
       });
     }
-  });
-  
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      error: err.message
+    });
+  }
 };
 
 // ADD MY PLANT
