@@ -84,7 +84,7 @@ exports.user_login = (req, res, next) => {
               email: userData.email,
               userId: userData._id
             },
-            process.env.JWT_KEY
+            'tandur-secret'
           );
           return res.status(200).json({
             message: 'Auth Success',

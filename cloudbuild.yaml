@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/tandur-backend', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/tandur-backend']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [
+    'beta', 
+    'run', 
+    'deploy', 
+    'tandur-backend',
+    '--image',
+    'gcr.io/$PROJECT_ID/tandur-backend',
+    '--region',
+    'asia-southeast2',
+    '--platform',
+    'managed',
+    '--allow-unauthenticated'
+    ]
+images:
+- gcr.io/$PROJECT_ID/myimage
