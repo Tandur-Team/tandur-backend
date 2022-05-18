@@ -34,7 +34,7 @@ exports.user_signup = async (req, res, next) => {
             satisfaction_rate: 0
           }
           const user = await Users.create(data);
-          res.json({
+          return res.status(201).json({
             message: 'User created',
             data: user
           });
@@ -98,23 +98,22 @@ exports.user_login = async (req, res, next) => {
 };
 
 // GET ALL USERS
-exports.user_get_all = (req, res, next) => {
-  const queryCheckUser = 'SELECT * FROM tandur_coba.tandur_user'
-  connection.query(queryCheckUser, (err, rows, field) => {
-    if (err) {
-      return res.status(500).json({
-        message: 'Failed',
-        error: err
-      });
-    }
+exports.user_get_all = async (req, res, next) => {
+  try {
+    const user = await Users.findAll();
 
-    if (rows) {
+    if (user) {
       return res.status(200).json({
         message: 'Users fetched',
-        data: rows
+        data: user
       });
     }
-  });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      error: err.message
+    });
+  }
 };
 
 // GET USER BY ID (USER DETAIL)
