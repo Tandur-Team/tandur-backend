@@ -1,21 +1,13 @@
 steps:
+
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/tandur-backend', '.']
+  args: ['build', '-f','./Dockerfile', '-t', 'gcr.io/$PROJECT_ID/tandur-backend-images', '.']
+
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/tandur-backend']
+  args: ['push', 'gcr.io/$PROJECT_ID/tandur-backend-images']
+
 - name: 'gcr.io/cloud-builders/gcloud'
-  args: [
-    'beta', 
-    'run', 
-    'deploy', 
-    'tandur-backend',
-    '--image',
-    'gcr.io/$PROJECT_ID/tandur-backend',
-    '--region',
-    'asia-southeast2',
-    '--platform',
-    'managed',
-    '--allow-unauthenticated'
-    ]
+  args: ['run', 'deploy', 'tandur-backend-auto', '--image=gcr.io/$PROJECT_ID/tandur-backend', '--region', 'asia-southeast2', '--platform', 'managed', '--port', '8080', --allow-unauthenticated']
+
 images:
-- gcr.io/$PROJECT_ID/myimage
+- gcr.io/$PROJECT_ID/tandur-backend-images/tandur-backend:$SHORT_SHA
