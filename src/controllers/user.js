@@ -33,7 +33,7 @@ exports.user_signup = async (req, res, next) => {
           const plantUrl = `localhost:8080/${userId}/plant`;
           const data = {
             _id: userId,
-            full_name: req.body.name,
+            full_name: req.body.full_name,
             email: req.body.email,
             password: hash,
             avg_satisfaction_rate: 0.0,
