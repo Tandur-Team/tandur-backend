@@ -29,12 +29,15 @@ exports.user_signup = async (req, res, next) => {
             error: err
           });
         } else {
+          const userId = nanoid(32);
+          const plantUrl = `localhost:8080/${userId}/plant`;
           const data = {
-            _id: nanoid(16),
-            name: req.body.name,
+            _id: userId,
+            full_name: req.body.name,
             email: req.body.email,
             password: hash,
-            satisfaction_rate: 0
+            avg_satisfaction_rate: 0.0,
+            my_plant_url: plantUrl
           }
           const user = await Users.create(data);
           return res.status(201).json({
@@ -42,9 +45,8 @@ exports.user_signup = async (req, res, next) => {
             status: 201,
             data: {
               _id: user._id,
-              name: user.name,
-              email: user.email,
-              satisfaction_rate: user.satisfaction_rate
+              full_name: user.full_name,
+              email: user.email
             }
           });
         }
