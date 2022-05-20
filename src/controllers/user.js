@@ -17,26 +17,37 @@ exports.user_signup = async (req, res, next) => {
 
     if (user.length > 0) {
       return res.status(409).json({
-        message: 'Email already exists'
+        message: 'Email already exists',
+        status: 409
       });
     } else {
       bcrypt.hash(req.body.password, 10, async (err, hash) => {
         if (err) {
           return res.status(500).json({
+            message: 'Failed',
+            status: 500,
             error: err
           });
         } else {
+          const userId = nanoid(32);
+          const plantUrl = `localhost:8080/${userId}/plant`;
           const data = {
-            _id: nanoid(16),
-            name: req.body.name,
+            _id: userId,
+            full_name: req.body.full_name,
             email: req.body.email,
             password: hash,
-            satisfaction_rate: 0
+            avg_satisfaction_rate: 0.0,
+            my_plant_url: plantUrl
           }
           const user = await Users.create(data);
           return res.status(201).json({
             message: 'User created',
-            data: user
+            status: 201,
+            data: {
+              _id: user._id,
+              full_name: user.full_name,
+              email: user.email
+            }
           });
         }
       });
@@ -44,6 +55,7 @@ exports.user_signup = async (req, res, next) => {
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
+      status: 500,
       error: err.message
     });
   }
@@ -60,14 +72,16 @@ exports.user_login = async (req, res, next) => {
 
     if (user.length < 1) {
       return res.status(401).json({
-        message: 'Email not Found'
+        message: 'Email not Found',
+        status: 401
       });
     } else {
       const userData = user[0];
       bcrypt.compare(req.body.password, userData.password, (err, result) => {
         if (err) {
           return res.status(401).json({
-            message: 'Auth Failed'
+            message: 'Auth Failed',
+            status: 401
           });
         }
         if (result) {
@@ -80,18 +94,21 @@ exports.user_login = async (req, res, next) => {
           );
           return res.status(200).json({
             message: 'Auth Success',
+            status: 200,
             userId: userData._id,
             token: token
           });
         }
         return res.status(401).json({
-          message: 'Auth Failed: Password is Incorrect'
+          message: 'Auth Failed: Password is Incorrect',
+          status: 401
         });
       });
     }
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
+      status: 500,
       error: err.message
     });
   }
@@ -105,12 +122,14 @@ exports.user_get_all = async (req, res, next) => {
     if (user) {
       return res.status(200).json({
         message: 'Users fetched',
+        status: 200,
         data: user
       });
     }
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
+      status: 500,
       error: err.message
     });
   }
@@ -128,49 +147,60 @@ exports.user_get_detail = async (req, res, next) => {
     if (user.length > 0) {
       return res.status(200).json({
         message: 'User Found',
-        data: user[0]
+        status: 200,
+        data: {
+          _id: user[0]._id,
+          name: user[0].name,
+          email: user[0].email,
+          satisfaction_rate: user[0].satisfaction_rate
+        }
       });
     } else {
       return res.status(404).json({
-        message: 'User not Found'
+        message: 'User not Found',
+        status: 404
       });
     }
 
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
+      status: 404,
       error: err.message
     });
   }
 };
 
 // ADD MY PLANT
-exports.user_add_myplant = (req, res, next) => {
-  const user = Users.find(user => user._id == req.params.userId);
-  if (user !== undefined) {
-    const newPlant = {
-      _id: nanoid(16),
-      name: req.body.name,
-      owner_id: req.params.userId,
-      plant_date: req.body.plant_date,
-      harvest_date: req.body.harvest_date,
-      location: req.body.location,
-      rain: req.body.rain,
-      temperature: req.body.temperature,
-      soil_ph: req.body.soil_ph,
-      is_done: false
-    };
+exports.user_add_myplant = async (req, res, next) => {
+  try {
+    const duration = 3;
 
-    user.my_plant.push(newPlant);
-    Plants.push(newPlant);
-
+    const date = new Date();
+    const start_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
+    const harvest_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
+    
+    const data = {
+      _id: nanoid(32),
+      plant_name: req.body.plant_name,
+      userId: req.params.userId,
+      zone: req.body.zone,
+      plant_start_date: start_date,
+      plant_harvest_date: harvest_date,
+      is_harvested: 0,
+      satisfaction_rate: 0
+    }
+    const plant = await Plants.create(data);
     return res.status(201).json({
       message: 'Plant added',
-      data: newPlant
+      status: 201,
+      data: plant
     });
-  } else {
-    return res.status(404).json({
-      message: 'User not Found'
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      status: 404,
+      error: err.message
     });
   }
 };

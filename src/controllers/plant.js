@@ -2,25 +2,24 @@ const { nanoid } = require('nanoid');
 
 const Plants = require('../models/plant');
 
-// GET ALL PLANTS
-exports.plant_get_all = (req, res, next) => {
-  return res.status(200).json({
-    message: 'Plants fetched',
-    data: Plants
+// GET NEARBY PLANTS
+exports.plant_get_nearby = async (req, res, next) => {
+  const plants = await Plants.findAll({
+    where: {
+      zone: req.params.zone
+    }
   });
-};
 
-// GET PLANT DETAIL
-exports.plant_get_detail = (req, res, next) => {
-  const plant = Plants.find(plant => plant._id == req.params.plantId);
-  if (plant !== undefined) {
+  if (plants.length > 0) {
     return res.status(200).json({
-      message: `Plant found`,
-      data: plant
+      message: 'Nearby plants fetched',
+      status: 200,
+      data: plants
     });
   } else {
     return res.status(404).json({
-      message: 'Plant not Found'
+      message: 'Nearby plant not found',
+      status: 404
     });
   }
 };

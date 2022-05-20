@@ -6,7 +6,7 @@ const model = {
     type: Sequelize.STRING,
     primaryKey: true
   },
-  name: {
+  full_name: {
     type: Sequelize.STRING
   },
   email: {
@@ -15,9 +15,12 @@ const model = {
   password: {
     type: Sequelize.STRING
   },
-  satisfaction_rate: {
-    type: Sequelize.INTEGER
+  avg_satisfaction_rate: {
+    type: Sequelize.DOUBLE
   },
+  my_plant_url: {
+    type: Sequelize.STRING
+  }
 }
 
 const options = {
