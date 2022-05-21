@@ -206,16 +206,27 @@ exports.user_add_myplant = async (req, res, next) => {
 };
 
 // GET ALL MY PLANTS
-exports.user_get_all_myplant = (req, res, next) => {
-  const user = Users.find(user => user._id == req.params.userId);
-  if (user !== undefined) {
-    res.status(200).json({
-      message: 'My Plants fetched',
-      data: user.my_plant
+exports.user_get_all_myplant = async (req, res, next) => {
+  try {
+    const plant = await Plants.findAll({
+      where: {
+        userId: req.params.userId
+      }
     });
-  } else {
-    return res.status(404).json({
-      message: 'User not Found'
+
+    if (plant) {
+      return res.status(200).json({
+        message: 'Plants fetched',
+        status: 200,
+        data: plant
+      });
+    }
+
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      status: 404,
+      error: err.message
     });
   }
 };
