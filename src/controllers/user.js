@@ -179,18 +179,22 @@ exports.user_add_myplant = async (req, res, next) => {
     const date = new Date();
     const start_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
     const harvest_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
-    
+
     const data = {
       _id: nanoid(32),
       plant_name: req.body.plant_name,
-      userId: req.params.userId,
-      zone: req.body.zone,
+      user_id: req.params.userId,
+      zone_local: req.body.zone_local,
+      zone_city: req.body.zone_city,
       plant_start_date: start_date,
       plant_harvest_date: harvest_date,
       is_harvested: 0,
-      satisfaction_rate: 0
+      satisfaction_rate: 0,
+      created_at: new Date()
     }
+
     const plant = await Plants.create(data);
+
     return res.status(201).json({
       message: 'Plant added',
       status: 201,
@@ -210,7 +214,7 @@ exports.user_get_all_myplant = async (req, res, next) => {
   try {
     const plant = await Plants.findAll({
       where: {
-        userId: req.params.userId
+        user_id: req.params.userId
       }
     });
 
@@ -235,9 +239,11 @@ exports.user_get_all_myplant = async (req, res, next) => {
 exports.user_harvest_myplant = async (req, res, next) => {
   try {
     const data = {
-      is_harvested: 1
+      is_harvested: 1,
+      satisfaction_rate: req.body.satisfaction_rate
     }
-    await Plants.update(data,{
+
+    await Plants.update(data, {
       where: {
         _id: req.params.plantId
       }
@@ -248,11 +254,13 @@ exports.user_harvest_myplant = async (req, res, next) => {
         _id: req.params.plantId
       }
     });
+
     return res.status(200).json({
       message: 'Plants Updated',
       status: 200,
-      data: plant
+      data: plant[0]
     });
+
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
