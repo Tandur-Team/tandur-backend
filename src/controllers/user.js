@@ -37,7 +37,8 @@ exports.user_signup = async (req, res, next) => {
             email: req.body.email,
             password: hash,
             avg_satisfaction_rate: 0.0,
-            my_plant_url: plantUrl
+            my_plant_url: plantUrl,
+            created_at: new Date()
           }
           const user = await Users.create(data);
           return res.status(201).json({
@@ -95,7 +96,7 @@ exports.user_login = async (req, res, next) => {
           return res.status(200).json({
             message: 'Auth Success',
             status: 200,
-            userId: userData._id,
+            user_id: userData._id,
             token: token
           });
         }
@@ -145,14 +146,17 @@ exports.user_get_detail = async (req, res, next) => {
     });
 
     if (user.length > 0) {
+      const plantUrl = `localhost:8080/${user[0]._id}/plant`;
+
       return res.status(200).json({
         message: 'User Found',
         status: 200,
         data: {
           _id: user[0]._id,
-          name: user[0].name,
+          full_name: user[0].full_name,
           email: user[0].email,
-          satisfaction_rate: user[0].satisfaction_rate
+          avg_satisfaction_rate: user[0].avg_satisfaction_rate,
+          my_plant_url: plantUrl
         }
       });
     } else {
@@ -165,7 +169,7 @@ exports.user_get_detail = async (req, res, next) => {
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
-      status: 404,
+      status: 500,
       error: err.message
     });
   }
@@ -203,7 +207,7 @@ exports.user_add_myplant = async (req, res, next) => {
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
-      status: 404,
+      status: 500,
       error: err.message
     });
   }
@@ -229,7 +233,7 @@ exports.user_get_all_myplant = async (req, res, next) => {
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
-      status: 404,
+      status: 500,
       error: err.message
     });
   }
@@ -264,7 +268,7 @@ exports.user_harvest_myplant = async (req, res, next) => {
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
-      status: 404,
+      status: 500,
       error: err.message
     });
   }

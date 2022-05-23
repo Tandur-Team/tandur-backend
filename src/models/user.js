@@ -20,11 +20,15 @@ const model = {
   },
   my_plant_url: {
     type: Sequelize.STRING
+  },
+  created_at: {
+    type: Sequelize.DATE
   }
 }
 
 const options = {
   freezeTableName: true,
+  createdAt: false,
   updatedAt: false,
 }
 
