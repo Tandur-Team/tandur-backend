@@ -38,6 +38,9 @@ exports.fixed_plant_detail = async (req, res, next) => {
       }
     });
 
+    // VARIABLE HARVEST DURATION
+    const duration = fixed_plant.harvest_duration;
+
     // QUERY NEARBY PLANTS
     const user_plant = await Plants.findAll({
       where: {
@@ -48,45 +51,71 @@ exports.fixed_plant_detail = async (req, res, next) => {
       }
     });
 
-    // VARIABLE HARVEST DURATION
-    const duration = fixed_plant.harvest_duration;
-
     // VARIABLE NEARBY USER PLANT
     const nearby = user_plant.length;
 
-    // VARIABLE START AND FINISH DATE
-    const date = new Date();
-    const start_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
-    const harvest_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
+    var d = new Date();
 
-    // VARIABLE RESPOND
-    let respond;
+    let weatherResponds;
+    var weatherRespondsArr = [];
 
-    // GET WEATHER DATA
-    await axios
-      .get(`https://api.meteomatics.com/${start_date}T00:00:00Z--${harvest_date}T00:00:00Z:PT24H/relative_humidity_max_2m_24h:p/${req.query.lat},${req.query.long}/json`, {
-        auth: {
-          username: 'tandur_shafiqrozaan',
-          password: 'RRnDv2tC81'
-        }
-      })
-      .then(res => {
-        respond = res.data;
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    // ARRAY FOR SAVING MONTHLY DATA
+    var avgTempArr = [];
+    var avgHumidityArr = [];
+    var avgRainArr = [];
 
-    console.log(respond);
+    // MONTHLY LOOP
+    for (let i = 0; i < duration; i++) {
+      var currentDate = d.getFullYear() + '-' + (("0" + (d.getMonth() + 1)).slice(-2)) + '-' + (("0" + d.getDate()).slice(-2));
+
+      d.setMonth(d.getMonth() + 1);
+
+      var nextDate = d.getFullYear() + '-' + (("0" + (d.getMonth() + 1)).slice(-2)) + '-' + (("0" + d.getDate()).slice(-2));
+
+      // GET HUMIDITY DATA
+      await axios
+        .get(`https://api.meteomatics.com/${currentDate}T00:00:00Z--${nextDate}T00:00:00Z:PT24H/relative_humidity_max_2m_24h:p/${req.query.lat},${req.query.long}/json`, {
+          auth: {
+            username: 'tandur_shafiqrozaan',
+            password: 'RRnDv2tC81'
+          }
+        })
+        .then(res => {
+          weatherResponds = res.data.data[0].coordinates[0].dates;
+          weatherRespondsArr.push(weatherResponds);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+
+      var avg = 0;
+      var total = 0;
+
+      for (let j = 0; j < weatherRespondsArr[i].length; j++) {
+        total = total + weatherRespondsArr[i][j].value;
+      }
+
+      avg = total / weatherRespondsArr[i].length;
+
+      // PUSH AVERAGE MONTHLY DATA INTO ARRAY
+      avgTempArr.push(0);
+      avgHumidityArr.push(avg);
+      avgRainArr.push(0);
+    }
 
     return res.status(200).json({
       message: 'Recommended Plant Detail',
       status: 200,
       data: {
-        fixed_plant: fixed_plant,
-        user_plant: user_plant,
+        location: `${req.query.zone_local}, ${req.query.zone_city}`,
         nearby: nearby,
-        respond: respond
+        harvest_duration: duration,
+        image_url: fixed_plant.image_url,
+        monthly_data: {
+          avg_temp: avgTempArr,
+          avg_humidity: avgHumidityArr,
+          avg_rain: avgRainArr,
+        },
       }
     });
   } catch (err) {
