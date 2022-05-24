@@ -37,7 +37,8 @@ exports.user_signup = async (req, res, next) => {
             email: req.body.email,
             password: hash,
             avg_satisfaction_rate: 0.0,
-            my_plant_url: plantUrl
+            my_plant_url: plantUrl,
+            created_at: new Date()
           }
           const user = await Users.create(data);
           return res.status(201).json({
@@ -95,7 +96,7 @@ exports.user_login = async (req, res, next) => {
           return res.status(200).json({
             message: 'Auth Success',
             status: 200,
-            userId: userData._id,
+            user_id: userData._id,
             token: token
           });
         }
@@ -145,14 +146,17 @@ exports.user_get_detail = async (req, res, next) => {
     });
 
     if (user.length > 0) {
+      const plantUrl = `localhost:8080/${user[0]._id}/plant`;
+
       return res.status(200).json({
         message: 'User Found',
         status: 200,
         data: {
           _id: user[0]._id,
-          name: user[0].name,
+          full_name: user[0].full_name,
           email: user[0].email,
-          satisfaction_rate: user[0].satisfaction_rate
+          avg_satisfaction_rate: user[0].avg_satisfaction_rate,
+          my_plant_url: plantUrl
         }
       });
     } else {
@@ -165,7 +169,7 @@ exports.user_get_detail = async (req, res, next) => {
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
-      status: 404,
+      status: 500,
       error: err.message
     });
   }
@@ -179,18 +183,22 @@ exports.user_add_myplant = async (req, res, next) => {
     const date = new Date();
     const start_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
     const harvest_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
-    
+
     const data = {
       _id: nanoid(32),
       plant_name: req.body.plant_name,
-      userId: req.params.userId,
-      zone: req.body.zone,
+      user_id: req.params.userId,
+      zone_local: req.body.zone_local,
+      zone_city: req.body.zone_city,
       plant_start_date: start_date,
       plant_harvest_date: harvest_date,
       is_harvested: 0,
-      satisfaction_rate: 0
+      satisfaction_rate: 0,
+      created_at: new Date()
     }
+
     const plant = await Plants.create(data);
+
     return res.status(201).json({
       message: 'Plant added',
       status: 201,
@@ -199,7 +207,7 @@ exports.user_add_myplant = async (req, res, next) => {
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
-      status: 404,
+      status: 500,
       error: err.message
     });
   }
@@ -210,7 +218,7 @@ exports.user_get_all_myplant = async (req, res, next) => {
   try {
     const plant = await Plants.findAll({
       where: {
-        userId: req.params.userId
+        user_id: req.params.userId
       }
     });
 
@@ -225,7 +233,7 @@ exports.user_get_all_myplant = async (req, res, next) => {
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
-      status: 404,
+      status: 500,
       error: err.message
     });
   }
@@ -235,9 +243,11 @@ exports.user_get_all_myplant = async (req, res, next) => {
 exports.user_harvest_myplant = async (req, res, next) => {
   try {
     const data = {
-      is_harvested: 1
+      is_harvested: 1,
+      satisfaction_rate: req.body.satisfaction_rate
     }
-    await Plants.update(data,{
+
+    await Plants.update(data, {
       where: {
         _id: req.params.plantId
       }
@@ -248,15 +258,17 @@ exports.user_harvest_myplant = async (req, res, next) => {
         _id: req.params.plantId
       }
     });
+
     return res.status(200).json({
       message: 'Plants Updated',
       status: 200,
-      data: plant
+      data: plant[0]
     });
+
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
-      status: 404,
+      status: 500,
       error: err.message
     });
   }
