@@ -30,6 +30,9 @@ const model = {
   satisfaction_rate: {
     type: Sequelize.INTEGER
   },
+  image_url: {
+    type: Sequelize.STRING
+  },
   created_at: {
     type: Sequelize.DATE
   }
