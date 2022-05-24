@@ -1,12 +1,15 @@
-const { nanoid } = require('nanoid');
-
 const Plants = require('../models/plant');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 // GET NEARBY PLANTS
 exports.plant_get_nearby = async (req, res, next) => {
   const plants = await Plants.findAll({
     where: {
-      zone: req.params.zone
+      zone_local: {
+        [Op.like]: `%${req.query.zone_local}%`
+      },
+      zone_city: req.query.zone_city
     }
   });
 

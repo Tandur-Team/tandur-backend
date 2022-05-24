@@ -2,9 +2,9 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const connection = require('../configs/database');
 const Users = require('../models/user');
 const Plants = require('../models/plant');
+const FixedPlants = require('../models/fixed-plant');
 
 // REGISTER/SIGNUP
 exports.user_signup = async (req, res, next) => {
@@ -184,6 +184,12 @@ exports.user_add_myplant = async (req, res, next) => {
     const start_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
     const harvest_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
 
+    const fixed_plant = await FixedPlants.findAll({
+      where: {
+        plant_name: req.body.plant_name
+      }
+    });
+
     const data = {
       _id: nanoid(32),
       plant_name: req.body.plant_name,
@@ -194,6 +200,7 @@ exports.user_add_myplant = async (req, res, next) => {
       plant_harvest_date: harvest_date,
       is_harvested: 0,
       satisfaction_rate: 0,
+      image_url: fixed_plant[0].image_url,
       created_at: new Date()
     }
 
