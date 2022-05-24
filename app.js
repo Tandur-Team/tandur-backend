@@ -3,9 +3,10 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
-const Database = require('./src/configs/database')
+const Database = require('./src/configs/database');
 const userRoutes = require('./src/routes/user');
 const plantRoutes = require('./src/routes/plant');
+const fixedPlantRoutes = require('./src/routes/fixed-plant');
 
 try {
   Database.db.authenticate();
@@ -32,6 +33,8 @@ app.use((req, res, next) => {
 // Routing
 app.use('/user', userRoutes);
 app.use('/plant', plantRoutes);
+app.use('/fixedplant', fixedPlantRoutes);
+
 
 // Custom error
 app.use((req, res, next) => {
