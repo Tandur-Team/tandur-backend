@@ -1,5 +1,7 @@
+const FixedPlants = require('../models/fixed-plant');
 const Plants = require('../models/plant');
 const Sequelize = require('sequelize');
+const axios = require('axios');
 const Op = Sequelize.Op;
 
 // GET NEARBY PLANTS
@@ -23,6 +25,75 @@ exports.plant_get_nearby = async (req, res, next) => {
     return res.status(404).json({
       message: 'Nearby plant not found',
       status: 404
+    });
+  }
+};
+
+exports.fixed_plant_detail = async (req, res, next) => {
+  try {
+    // QUERY FIXED PLANTS
+    const fixed_plant = await FixedPlants.findOne({
+      where: {
+        plant_name: req.params.plantName
+      }
+    });
+
+    // QUERY NEARBY PLANTS
+    const user_plant = await Plants.findAll({
+      where: {
+        zone_local: {
+          [Op.like]: `%${req.query.zone_local}%`
+        },
+        zone_city: req.query.zone_city
+      }
+    });
+
+    // VARIABLE HARVEST DURATION
+    const duration = fixed_plant.harvest_duration;
+
+    // VARIABLE NEARBY USER PLANT
+    const nearby = user_plant.length;
+
+    // VARIABLE START AND FINISH DATE
+    const date = new Date();
+    const start_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
+    const harvest_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
+
+    // VARIABLE RESPOND
+    let respond;
+
+    // GET WEATHER DATA
+    await axios
+      .get(`https://api.meteomatics.com/${start_date}T00:00:00Z--${harvest_date}T00:00:00Z:PT24H/relative_humidity_max_2m_24h:p/${req.query.lat},${req.query.long}/json`, {
+        auth: {
+          username: 'tandur_shafiqrozaan',
+          password: 'RRnDv2tC81'
+        }
+      })
+      .then(res => {
+        respond = res.data;
+      })
+      .catch(error => {
+        console.error(error);
+      });
+
+    console.log(respond);
+
+    return res.status(200).json({
+      message: 'Recommended Plant Detail',
+      status: 200,
+      data: {
+        fixed_plant: fixed_plant,
+        user_plant: user_plant,
+        nearby: nearby,
+        respond: respond
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      status: 500,
+      error: err.message
     });
   }
 };

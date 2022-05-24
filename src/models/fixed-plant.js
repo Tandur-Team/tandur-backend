@@ -30,6 +30,9 @@ const model = {
   max_rain: {
     type: Sequelize.DOUBLE
   },
+  harvest_duration: {
+    type: Sequelize.INTEGER
+  },
 }
 
 const options = {
