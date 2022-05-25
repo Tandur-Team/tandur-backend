@@ -59,7 +59,7 @@ exports.fixed_plant_detail = async (req, res, next) => {
     const start_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
     const harvest_date = date.getFullYear() + '-' + (("0" + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (("0" + date.getDate()).slice(-2));
 
-    // VARIABLE RESPOND
+    // VARIABLE THIRD PARTY API RESPOND
     var humidityResponds;
     var humidityTotal = 0.0;
     var rainResponds;
@@ -146,12 +146,15 @@ exports.fixed_plant_detail = async (req, res, next) => {
       message: 'Recommended Plant Detail',
       status: 200,
       data: {
-        fixed_plant: fixed_plant,
-        user_plant: user_plant,
+        probability: 90,
+        location: `${req.query.zone_local}, ${req.query.zone_city}`,
         nearby: nearby,
-        average_humidity: avgHumidityArr,
-        average_rain: avgRainArr,
-        average_temp: avgTempArr
+        duration: duration,
+        monthly_data:{
+          average_humidity: avgHumidityArr,
+          average_rain: avgRainArr,
+          average_temp: avgTempArr
+        },
       }
     });
   } catch (err) {
