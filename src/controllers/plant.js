@@ -6,30 +6,39 @@ const Op = Sequelize.Op;
 
 // GET NEARBY PLANTS
 exports.plant_get_nearby = async (req, res, next) => {
-  const plants = await Plants.findAll({
-    where: {
-      zone_local: {
-        [Op.like]: `%${req.query.zone_local}%`
-      },
-      zone_city: req.query.zone_city
-    }
-  });
-
-  if (plants.length > 0) {
-    return res.status(200).json({
-      message: 'Nearby plants fetched',
-      status: 200,
-      data: plants
+  try {
+    const plants = await Plants.findAll({
+      where: {
+        zone_local: {
+          [Op.like]: `%${req.query.zone_local}%`
+        },
+        zone_city: req.query.zone_city
+      }
     });
-  } else {
-    return res.status(404).json({
-      message: 'Nearby plant not found',
-      status: 404
+  
+    if (plants.length > 0) {
+      return res.status(200).json({
+        message: 'Nearby plants fetched',
+        status: 200,
+        data: plants
+      });
+    } else {
+      return res.status(404).json({
+        message: 'Nearby plant not found',
+        status: 404
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      status: 500,
+      error: err.message
     });
   }
 };
 
-exports.fixed_plant_detail = async (req, res, next) => {
+// GET PLANT RECOMMENDATION DETAIL
+exports.plant_recommendation_detail = async (req, res, next) => {
   try {
     // QUERY FIXED PLANTS
     const fixed_plant = await FixedPlants.findOne({
@@ -146,6 +155,8 @@ exports.fixed_plant_detail = async (req, res, next) => {
       message: 'Recommended Plant Detail',
       status: 200,
       data: {
+        plant_name: req.params.plantName,
+        image_url: fixed_plant.image_url,
         probability: 90,
         location: `${req.query.zone_local}, ${req.query.zone_city}`,
         nearby: nearby,
