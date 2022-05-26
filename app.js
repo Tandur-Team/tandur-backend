@@ -38,7 +38,7 @@ app.use('/fixedplant', fixedPlantRoutes);
 
 // Custom error
 app.use((req, res, next) => {
-  const error = new Error('Not found');
+  const error = new Error('Endpoint Not found');
   error.status = 404;
   next(error);
 });
