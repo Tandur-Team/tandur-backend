@@ -1,6 +1,7 @@
 const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const Users = require('../models/user');
 const Plants = require('../models/plant');
@@ -91,7 +92,7 @@ exports.user_login = async (req, res, next) => {
               email: userData.email,
               userId: userData._id
             },
-            'tandur-secret'
+            process.env.JWT_KEY
           );
           return res.status(200).json({
             message: 'Auth Success',

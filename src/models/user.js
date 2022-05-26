@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Sequelize = require('sequelize');
 const Database = require('../configs/database');
 
@@ -32,6 +33,6 @@ const options = {
   updatedAt: false,
 }
 
-const User = Database.db.define('tandur_user', model, options);
+const User = Database.db.define(process.env.DB_TABLE_USER, model, options);
 
 module.exports = User;
