@@ -15,7 +15,7 @@ exports.plant_get_nearby = async (req, res, next) => {
         zone_city: req.query.zone_city
       }
     });
-  
+
     if (plants.length > 0) {
       return res.status(200).json({
         message: 'Nearby plants fetched',
@@ -80,6 +80,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     var avgHumidityArr = [];
     var avgRainArr = [];
     var avgTempArr = [];
+    var avgMonthArr = [];
 
     // VARIABLE FOR INDEX
     var index = 0;
@@ -133,7 +134,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       }
       day++;
     }
-    
+
     index = 0;
 
     // GET TEMPERATURE AVG DATA
@@ -151,6 +152,16 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       day++;
     }
 
+    // GET ARRAY AS RESPOND
+    for (let i = 0; i < avgHumidityArr.length; i++) {
+      var dataMonth = {
+        average_humidity: avgHumidityArr[i],
+        average_rain: avgRainArr[i],
+        average_temp: avgTempArr[i]
+      }
+      avgMonthArr.push(dataMonth);
+    }
+
     return res.status(200).json({
       message: 'Recommended Plant Detail',
       status: 200,
@@ -161,11 +172,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
         location: `${req.query.zone_local}, ${req.query.zone_city}`,
         nearby: nearby,
         duration: duration,
-        monthly_data:{
-          average_humidity: avgHumidityArr,
-          average_rain: avgRainArr,
-          average_temp: avgTempArr
-        },
+        monthly_data: avgMonthArr,
       }
     });
   } catch (err) {
