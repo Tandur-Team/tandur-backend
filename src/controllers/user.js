@@ -98,7 +98,8 @@ exports.user_login = async (req, res, next) => {
             message: 'Auth Success',
             status: 200,
             user_id: userData._id,
-            token: token
+            token: token,
+            full_name: userData.full_name
           });
         }
         return res.status(401).json({
