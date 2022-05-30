@@ -7,20 +7,51 @@ const Op = Sequelize.Op;
 // GET NEARBY PLANTS
 exports.plant_get_nearby = async (req, res, next) => {
   try {
-    const plants = await Plants.findAll({
-      where: {
-        zone_local: {
-          [Op.like]: `%${req.query.zone_local}%`
-        },
-        zone_city: req.query.zone_city
-      }
-    });
+    const fixedPlants = await FixedPlants.findAll();
+    var responseArr = []
 
-    if (plants.length > 0) {
+    for (let i = 0; i < fixedPlants.length; i++) {
+
+      const plants = await Plants.findAll({
+        where: {
+          plant_name: fixedPlants[i].plant_name,
+          zone_local: {
+            [Op.like]: `%${req.query.zone_local}%`
+          },
+          zone_city: req.query.zone_city
+        }
+      });
+
+      var totalSatisfactionRate = 0;
+      var harvestedPlantCount = 0;
+
+      for (let j = 0; j < plants.length; j++) {
+        if (plants[j].is_harvested == 1) {
+          totalSatisfactionRate += plants[j].satisfaction_rate;
+          harvestedPlantCount++;
+        }
+      }
+
+      const avgSatisfactionRate = totalSatisfactionRate / harvestedPlantCount;
+
+      const data = {
+        plant_name: fixedPlants[i].plant_name,
+        image_url: fixedPlants[i].image_url,
+        nearby: plants.length,
+        avg_satisfaction_rate: avgSatisfactionRate,
+        harvest_duration: fixedPlants[i].harvest_duration
+      }
+
+      responseArr.push(data);
+    }
+
+    responseArr.sort((a,b) => b.nearby - a.nearby);
+
+    if (responseArr.length > 0) {
       return res.status(200).json({
         message: 'Nearby plants fetched',
         status: 200,
-        data: plants
+        data: responseArr
       });
     } else {
       return res.status(404).json({
