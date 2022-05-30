@@ -41,14 +41,14 @@ exports.plant_get_nearby = async (req, res, next) => {
 exports.plant_recommendation_detail = async (req, res, next) => {
   try {
     // QUERY FIXED PLANTS
-    const fixed_plant = await FixedPlants.findOne({
+    const fixedPlant = await FixedPlants.findOne({
       where: {
         plant_name: req.params.plantName
       }
     });
 
     // QUERY NEARBY PLANTS
-    const user_plant = await Plants.findAll({
+    const userPlant = await Plants.findAll({
       where: {
         zone_local: {
           [Op.like]: `%${req.query.zone_local}%`
@@ -58,10 +58,10 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     });
 
     // VARIABLE HARVEST DURATION
-    const duration = fixed_plant.harvest_duration;
+    const duration = fixedPlant.harvest_duration;
 
     // VARIABLE NEARBY USER PLANT
-    const nearby = user_plant.length;
+    const nearby = userPlant.length;
 
     // VARIABLE START AND FINISH DATE
     const date = new Date();
@@ -162,16 +162,27 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       avgMonthArr.push(dataMonth);
     }
 
+    // FIXED DATA
+    const fixedData = {
+      min_temp: fixedPlant.min_temp,
+      max_temp: fixedPlant.max_temp,
+      min_humidity: fixedPlant.min_humidity,
+      max_humidity: fixedPlant.max_humidity,
+      min_rain: fixedPlant.min_rain,
+      max_rain: fixedPlant.max_rain,
+    }
+
     return res.status(200).json({
       message: 'Recommended Plant Detail',
       status: 200,
       data: {
         plant_name: req.params.plantName,
-        image_url: fixed_plant.image_url,
+        image_url: fixedPlant.image_url,
         probability: 90,
         location: `${req.query.zone_local}, ${req.query.zone_city}`,
         nearby: nearby,
         duration: duration,
+        fixed_data: fixedData,
         monthly_data: avgMonthArr,
       }
     });

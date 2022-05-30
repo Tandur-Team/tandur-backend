@@ -191,6 +191,9 @@ exports.user_add_myplant = async (req, res, next) => {
       }
     });
 
+    // convert JSON to String
+    const stringMonthlyData = JSON.stringify(req.body.monthly_data)
+
     const data = {
       _id: nanoid(32),
       plant_name: req.body.plant_name,
@@ -205,7 +208,7 @@ exports.user_add_myplant = async (req, res, next) => {
       is_harvested: 0,
       satisfaction_rate: 0,
       image_url: fixed_plant[0].image_url,
-      monthly_data: "",
+      monthly_data: stringMonthlyData,
       created_at: new Date()
     }
 
@@ -260,11 +263,48 @@ exports.user_get_myplant_detail = async (req, res, next) => {
       }
     });
 
+    const fixedPlant = await FixedPlants.findOne({
+      where: {
+        plant_name: plant.plant_name
+      }
+    });
+
+    const fixedData = {
+      min_temp: fixedPlant.min_temp,
+      max_temp: fixedPlant.max_temp,
+      min_humidity: fixedPlant.min_humidity,
+      max_humidity: fixedPlant.max_humidity,
+      min_rain: fixedPlant.min_rain,
+      max_rain: fixedPlant.max_rain,
+    }
+
+    // convert String to JSON
+    const parsedMonthlyData = JSON.parse(plant.monthly_data);
+
+    const responseData = {
+      _id: plant._id,
+      plant_name: plant.plant_name,
+      user_id: plant.user_id,
+      lat: plant.lat,
+      long: plant.long,
+      zone_local: plant.zone_local,
+      zone_city: plant.zone_city,
+      plant_start_date: plant.plant_start_date,
+      plant_harvest_date: plant.plant_harvest_date,
+      probability: plant.probability,
+      is_harvested: plant.is_harvested,
+      satisfaction_rate: plant.satisfaction_rate,
+      image_url: plant.image_url,
+      fixedData: fixedData,
+      monthly_data: parsedMonthlyData,
+      created_at: plant.created_at
+    }
+
     if (plant) {
       return res.status(200).json({
         message: 'Plant detail fetched',
         status: 200,
-        data: plant
+        data: responseData
       });
     } else {
       return res.status(404).json({
