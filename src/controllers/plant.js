@@ -7,20 +7,51 @@ const Op = Sequelize.Op;
 // GET NEARBY PLANTS
 exports.plant_get_nearby = async (req, res, next) => {
   try {
-    const plants = await Plants.findAll({
-      where: {
-        zone_local: {
-          [Op.like]: `%${req.query.zone_local}%`
-        },
-        zone_city: req.query.zone_city
-      }
-    });
+    const fixedPlants = await FixedPlants.findAll();
+    var responseArr = []
 
-    if (plants.length > 0) {
+    for (let i = 0; i < fixedPlants.length; i++) {
+
+      const plants = await Plants.findAll({
+        where: {
+          plant_name: fixedPlants[i].plant_name,
+          zone_local: {
+            [Op.like]: `%${req.query.zone_local}%`
+          },
+          zone_city: req.query.zone_city
+        }
+      });
+
+      var totalSatisfactionRate = 0;
+      var harvestedPlantCount = 0;
+
+      for (let j = 0; j < plants.length; j++) {
+        if (plants[j].is_harvested == 1) {
+          totalSatisfactionRate += plants[j].satisfaction_rate;
+          harvestedPlantCount++;
+        }
+      }
+
+      const avgSatisfactionRate = totalSatisfactionRate / harvestedPlantCount;
+
+      const data = {
+        plant_name: fixedPlants[i].plant_name,
+        image_url: fixedPlants[i].image_url,
+        nearby: plants.length,
+        avg_satisfaction_rate: avgSatisfactionRate,
+        harvest_duration: fixedPlants[i].harvest_duration
+      }
+
+      responseArr.push(data);
+    }
+
+    responseArr.sort((a,b) => b.nearby - a.nearby);
+
+    if (responseArr.length > 0) {
       return res.status(200).json({
         message: 'Nearby plants fetched',
         status: 200,
-        data: plants
+        data: responseArr
       });
     } else {
       return res.status(404).json({
@@ -41,14 +72,14 @@ exports.plant_get_nearby = async (req, res, next) => {
 exports.plant_recommendation_detail = async (req, res, next) => {
   try {
     // QUERY FIXED PLANTS
-    const fixed_plant = await FixedPlants.findOne({
+    const fixedPlant = await FixedPlants.findOne({
       where: {
         plant_name: req.params.plantName
       }
     });
 
     // QUERY NEARBY PLANTS
-    const user_plant = await Plants.findAll({
+    const userPlant = await Plants.findAll({
       where: {
         zone_local: {
           [Op.like]: `%${req.query.zone_local}%`
@@ -58,10 +89,10 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     });
 
     // VARIABLE HARVEST DURATION
-    const duration = fixed_plant.harvest_duration;
+    const duration = fixedPlant.harvest_duration;
 
     // VARIABLE NEARBY USER PLANT
-    const nearby = user_plant.length;
+    const nearby = userPlant.length;
 
     // VARIABLE START AND FINISH DATE
     const date = new Date();
@@ -162,16 +193,27 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       avgMonthArr.push(dataMonth);
     }
 
+    // FIXED DATA
+    const fixedData = {
+      min_temp: fixedPlant.min_temp,
+      max_temp: fixedPlant.max_temp,
+      min_humidity: fixedPlant.min_humidity,
+      max_humidity: fixedPlant.max_humidity,
+      min_rain: fixedPlant.min_rain,
+      max_rain: fixedPlant.max_rain,
+    }
+
     return res.status(200).json({
       message: 'Recommended Plant Detail',
       status: 200,
       data: {
         plant_name: req.params.plantName,
-        image_url: fixed_plant.image_url,
+        image_url: fixedPlant.image_url,
         probability: 90,
         location: `${req.query.zone_local}, ${req.query.zone_city}`,
         nearby: nearby,
         duration: duration,
+        fixed_data: fixedData,
         monthly_data: avgMonthArr,
       }
     });

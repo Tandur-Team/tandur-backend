@@ -13,6 +13,12 @@ const model = {
   user_id: {
     type: Sequelize.STRING
   },
+  lat: {
+    type: Sequelize.DOUBLE
+  },
+  long: {
+    type: Sequelize.DOUBLE
+  },
   zone_local: {
     type: Sequelize.STRING
   },
@@ -25,6 +31,9 @@ const model = {
   plant_harvest_date: {
     type: Sequelize.DATE
   },
+  probability: {
+    type: Sequelize.INTEGER
+  },
   is_harvested: {
     type: Sequelize.TINYINT
   },
@@ -32,6 +41,9 @@ const model = {
     type: Sequelize.INTEGER
   },
   image_url: {
+    type: Sequelize.STRING
+  },
+  monthly_data: {
     type: Sequelize.STRING
   },
   created_at: {
