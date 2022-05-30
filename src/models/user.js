@@ -1,6 +1,6 @@
-require('dotenv').config();
-const Sequelize = require('sequelize');
-const Database = require('../configs/database');
+require('dotenv').config()
+const Sequelize = require('sequelize')
+const Database = require('../configs/database')
 
 const model = {
   _id: {
@@ -30,9 +30,9 @@ const model = {
 const options = {
   freezeTableName: true,
   createdAt: false,
-  updatedAt: false,
+  updatedAt: false
 }
 
-const User = Database.db.define(process.env.DB_TABLE_USER, model, options);
+const User = Database.db.define(process.env.DB_TABLE_USER, model, options)
 
-module.exports = User;
+module.exports = User
