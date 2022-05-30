@@ -195,13 +195,17 @@ exports.user_add_myplant = async (req, res, next) => {
       _id: nanoid(32),
       plant_name: req.body.plant_name,
       user_id: req.params.userId,
+      lat: req.body.lat,
+      long: req.body.long,
       zone_local: req.body.zone_local,
       zone_city: req.body.zone_city,
       plant_start_date: start_date,
       plant_harvest_date: harvest_date,
+      probability: 0,
       is_harvested: 0,
       satisfaction_rate: 0,
       image_url: fixed_plant[0].image_url,
+      monthly_data: "",
       created_at: new Date()
     }
 
@@ -246,6 +250,36 @@ exports.user_get_all_myplant = async (req, res, next) => {
     });
   }
 };
+
+// GET MY PLANT DETAIL
+exports.user_get_myplant_detail = async (req, res, next) => {
+  try {
+    const plant = await Plants.findOne({
+      where: {
+        _id: req.params.plantId
+      }
+    });
+
+    if (plant) {
+      return res.status(200).json({
+        message: 'Plant detail fetched',
+        status: 200,
+        data: plant
+      });
+    } else {
+      return res.status(404).json({
+        message: 'Plant not found',
+        status: 404,
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      status: 500,
+      error: err.message
+    });
+  }
+}
 
 // HARVEST MY PLANT
 exports.user_harvest_myplant = async (req, res, next) => {
