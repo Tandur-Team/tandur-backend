@@ -294,7 +294,7 @@ exports.user_get_myplant_detail = async (req, res, next) => {
       is_harvested: plant.is_harvested,
       satisfaction_rate: plant.satisfaction_rate,
       image_url: plant.image_url,
-      fixedData,
+      fixed_data: fixedData,
       monthly_data: parsedMonthlyData,
       created_at: plant.created_at
     }
@@ -334,17 +334,56 @@ exports.user_harvest_myplant = async (req, res, next) => {
       }
     })
 
-    const plant = await Plants.findAll({
+    const plant = await Plants.findOne({
       where: {
         _id: req.params.plantId
       }
     })
 
-    return res.status(200).json({
-      message: 'Plants Updated',
-      status: 200,
-      data: plant[0]
+    const fixedPlant = await FixedPlants.findOne({
+      where: {
+        plant_name: plant.plant_name
+      }
     })
+
+    const fixedData = {
+      min_temp: fixedPlant.min_temp,
+      max_temp: fixedPlant.max_temp,
+      min_humidity: fixedPlant.min_humidity,
+      max_humidity: fixedPlant.max_humidity,
+      min_rain: fixedPlant.min_rain,
+      max_rain: fixedPlant.max_rain
+    }
+
+    // convert String to JSON
+    const parsedMonthlyData = JSON.parse(plant.monthly_data)
+
+    const responseData = {
+      _id: plant._id,
+      plant_name: plant.plant_name,
+      user_id: plant.user_id,
+      lat: plant.lat,
+      long: plant.long,
+      zone_local: plant.zone_local,
+      zone_city: plant.zone_city,
+      plant_start_date: plant.plant_start_date,
+      plant_harvest_date: plant.plant_harvest_date,
+      probability: plant.probability,
+      is_harvested: plant.is_harvested,
+      satisfaction_rate: plant.satisfaction_rate,
+      image_url: plant.image_url,
+      fixed_data: fixedData,
+      monthly_data: parsedMonthlyData,
+      created_at: plant.created_at
+    }
+
+    if (plant) {
+      return res.status(200).json({
+        message: 'Plants Updated',
+        status: 200,
+        data: responseData
+      })
+    }
   } catch (err) {
     return res.status(500).json({
       message: 'Failed',
