@@ -16,6 +16,8 @@ router.post('/:userId/plant', checkAuth, UserController.user_add_myplant)
 
 router.get('/:userId/plant', checkAuth, UserController.user_get_all_myplant)
 
+router.get('/:userId/plant/search', checkAuth, UserController.user_get_query_myplant)
+
 router.get('/:userId/plant/:plantId', checkAuth, UserController.user_get_myplant_detail)
 
 router.patch('/:userId/plant/:plantId', checkAuth, UserController.user_harvest_myplant)
