@@ -23,7 +23,7 @@ exports.plant_query_name = async (req, res, next) => {
     const plants = await Plants.findAll({
       where: {
         plant_name: {
-          [Op.like]: `%${req.query.plant_name}%`
+          [Op.like]: `%${req.query.search}%`
         },
         zone_local: {
           [Op.like]: `%${req.query.zone_local}%`
