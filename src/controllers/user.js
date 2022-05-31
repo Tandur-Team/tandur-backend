@@ -1,6 +1,8 @@
 const { nanoid } = require('nanoid')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 require('dotenv').config()
 
 const Users = require('../models/user')
@@ -242,6 +244,39 @@ exports.user_get_all_myplant = async (req, res, next) => {
         message: 'Plants fetched',
         status: 200,
         data: plant
+      })
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      status: 500,
+      error: err.message
+    })
+  }
+}
+
+// GET QUERY SEARCH MY PLANTS
+exports.user_get_query_myplant = async (req, res, next) => {
+  try {
+    const plants = await Plants.findAll({
+      where: {
+        user_id: req.params.userId,
+        plant_name: {
+          [Op.like]: `%${req.query.search}%`
+        }
+      }
+    })
+
+    if (plants.length > 0) {
+      return res.status(200).json({
+        message: 'Query fetched',
+        status: 200,
+        data: plants
+      })
+    } else {
+      return res.status(404).json({
+        message: 'Query not found',
+        status: 404
       })
     }
   } catch (err) {
