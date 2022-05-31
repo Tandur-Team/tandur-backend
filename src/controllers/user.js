@@ -149,9 +149,30 @@ exports.user_get_detail = async (req, res, next) => {
       }
     })
 
-    if (user.length > 0) {
-      const plantUrl = `localhost:8080/${user[0]._id}/plant`
+    const activePlants = await Plants.findAll({
+      where: {
+        user_id: req.params.userId,
+        is_harvested: 0
+      }
+    })
 
+    const harvestedPlants = await Plants.findAll({
+      where: {
+        user_id: req.params.userId,
+        is_harvested: 1
+      }
+    })
+
+    let totalSatisfactionRate = 0
+    let avgSatisfactionRate = 0
+
+    for (let i = 0; i < harvestedPlants.length; i++) {
+      totalSatisfactionRate += harvestedPlants[i].satisfaction_rate
+    }
+
+    avgSatisfactionRate = totalSatisfactionRate / harvestedPlants.length
+
+    if (user.length > 0) {
       return res.status(200).json({
         message: 'User Found',
         status: 200,
@@ -159,8 +180,8 @@ exports.user_get_detail = async (req, res, next) => {
           _id: user[0]._id,
           full_name: user[0].full_name,
           email: user[0].email,
-          avg_satisfaction_rate: user[0].avg_satisfaction_rate,
-          my_plant_url: plantUrl
+          active_plants: activePlants.length,
+          avg_satisfaction_rate: avgSatisfactionRate
         }
       })
     } else {
