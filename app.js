@@ -7,6 +7,7 @@ const Database = require('./src/configs/database')
 const userRoutes = require('./src/routes/user')
 const plantRoutes = require('./src/routes/plant')
 const fixedPlantRoutes = require('./src/routes/fixed-plant')
+const weatherRoutes = require('./src/routes/weather')
 
 try {
   Database.db.authenticate()
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
 app.use('/user', userRoutes)
 app.use('/plant', plantRoutes)
 app.use('/fixedplant', fixedPlantRoutes)
+app.use('/weather', weatherRoutes)
 
 // Custom error
 app.use((req, res, next) => {
