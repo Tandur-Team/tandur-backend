@@ -16,12 +16,6 @@ const model = {
   password: {
     type: Sequelize.STRING
   },
-  avg_satisfaction_rate: {
-    type: Sequelize.DOUBLE
-  },
-  my_plant_url: {
-    type: Sequelize.STRING
-  },
   created_at: {
     type: Sequelize.DATE
   }

@@ -33,14 +33,11 @@ exports.user_signup = async (req, res, next) => {
           })
         } else {
           const userId = nanoid(32)
-          const plantUrl = `localhost:8080/${userId}/plant`
           const data = {
             _id: userId,
             full_name: req.body.full_name,
             email: req.body.email,
             password: hash,
-            avg_satisfaction_rate: 0.0,
-            my_plant_url: plantUrl,
             created_at: new Date()
           }
           const user = await Users.create(data)
@@ -100,8 +97,8 @@ exports.user_login = async (req, res, next) => {
             message: 'Auth Success',
             status: 200,
             user_id: userData._id,
-            token,
-            full_name: userData.full_name
+            full_name: userData.full_name,
+            token
           })
         }
         return res.status(401).json({
