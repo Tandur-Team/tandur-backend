@@ -259,7 +259,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
 
     // GET PROBABILITY PLANT MODEL
     // Array body reques [temperature, humidity, rainfall]
-    await axios.post(`https://plant-model-deploy-sfcizhzcmq-et.a.run.app/v1/models/${modelUrl}:predict`, {
+    await axios.post(`${process.env.BASE_URL_MODEL}/v1/models/${modelUrl}:predict`, {
       instances: [
         scaledData
       ]
