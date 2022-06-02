@@ -8,8 +8,8 @@ exports.weather_get_daily = async (req, res, next) => {
 
     await axios.get(`https://api.meteomatics.com/${formattedDate}T00:00:00Z/relative_humidity_max_2m_24h:p,precip_24h:mm,t_2m:C/${req.query.lat},${req.query.long}/json`, {
       auth: {
-        username: 'tandur_shafiqrozaan',
-        password: 'RRnDv2tC81'
+        username: process.env.METEO_USER,
+        password: process.env.METEO_PASSWORD
       }
     }).then(res => {
       humidity = res.data.data[0].coordinates[0].dates[0].value
