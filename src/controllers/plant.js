@@ -2,9 +2,7 @@ const FixedPlants = require('../models/fixed-plant')
 const Plants = require('../models/plant')
 const Sequelize = require('sequelize')
 const axios = require('axios')
-const tf = require('@tensorflow/tfjs-node')
-const sk = require('scikitjs')
-sk.setBackend(tf)
+const dfd = require('danfojs-node')
 const Op = Sequelize.Op
 
 // QUERY NEARBY PLANT NAME
@@ -247,19 +245,13 @@ exports.plant_recommendation_detail = async (req, res, next) => {
 
     index = 0
 
-    // GET TEMPERATURE AVG DATA
-    for (let i = 0; i < tempResponds.length; i++) {
-      tempTotal = tempTotal + tempResponds[i].value
-      const dateState = tempResponds[i].date.split('T')
-
-      if (dateState[0].slice(-2) === ('0' + date.getDate()).slice(-2)) {
-        avgTempArr[index - 1] = tempTotal / day
-        tempTotal = 0
-        day = 0
-        index++
-      }
-      day++
-    }
+    // PREPROCESSING DATA
+    const avgHumidity = avgHumidityArr.reduce((a, b) => a + b, 0) / avgHumidityArr.length
+    const avgRain = avgRainArr.reduce((a, b) => a + b, 0) / avgRainArr.length
+    const avgTemp = avgTempArr.reduce((a, b) => a + b, 0) / avgTempArr.length
+    const inputData = [avgTemp, avgHumidity, avgRain]
+    const scaler = new dfd.StandardScaler()
+    const scaledData = scaler.fitTransform(inputData)
 
     // GET ARRAY AS RESPOND
     for (let i = 0; i < avgHumidityArr.length; i++) {
@@ -287,7 +279,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       data: {
         plant_name: req.params.plantName,
         image_url: fixedPlant.image_url,
-        probability: 90,
+        scaledData,
         location: `${req.query.zone_local}, ${req.query.zone_city}`,
         nearby,
         duration,
