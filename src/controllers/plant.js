@@ -2,6 +2,9 @@ const FixedPlants = require('../models/fixed-plant')
 const Plants = require('../models/plant')
 const Sequelize = require('sequelize')
 const axios = require('axios')
+const tf = require('@tensorflow/tfjs-node')
+const sk = require('scikitjs')
+sk.setBackend(tf)
 const Op = Sequelize.Op
 
 // QUERY NEARBY PLANT NAME
@@ -209,46 +212,33 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     let day = 1
 
     // GET HUMIDITY DATA
-    await axios
-      .get(`https://api.meteomatics.com/${startDate}T00:00:00Z--${harvestDate}T00:00:00Z:PT24H/relative_humidity_max_2m_24h:p,precip_24h:mm,t_mean_2m_24h:C/${req.query.lat},${req.query.long}/json`, {
-        auth: {
-          username: 'tandur_shafiqrozaan',
-          password: 'RRnDv2tC81'
-        }
-      })
-      .then(res => {
-        humidityResponds = res.data.data[0].coordinates[0].dates
-        rainResponds = res.data.data[1].coordinates[0].dates
-        tempResponds = res.data.data[2].coordinates[0].dates
-      })
-      .catch(error => {
-        console.error(error)
-      })
+    await axios.get(`https://api.meteomatics.com/${startDate}T00:00:00Z--${harvestDate}T00:00:00Z:PT24H/relative_humidity_max_2m_24h:p,precip_24h:mm,t_mean_2m_24h:C/${req.query.lat},${req.query.long}/json`, {
+      auth: {
+        username: process.env.METEO_USER,
+        password: process.env.METEO_PASSWORD
+      }
+    }).then(res => {
+      humidityResponds = res.data.data[0].coordinates[0].dates
+      rainResponds = res.data.data[1].coordinates[0].dates
+      tempResponds = res.data.data[2].coordinates[0].dates
+    }).catch(error => {
+      console.error(error)
+    })
 
-    // GET HUMIDITY AVG DATA
+    // GET HUMIDITY, RAIN, TEMPERATURE AVG DATA
     for (let i = 0; i < humidityResponds.length; i++) {
       humidityTotal = humidityTotal + humidityResponds[i].value
+      rainTotal = rainTotal + rainResponds[i].value
+      tempTotal = tempTotal + tempResponds[i].value
       const dateState = humidityResponds[i].date.split('T')
 
       if (dateState[0].slice(-2) === ('0' + date.getDate()).slice(-2)) {
         avgHumidityArr[index - 1] = humidityTotal / day
-        humidityTotal = 0
-        day = 0
-        index++
-      }
-      day++
-    }
-
-    index = 0
-
-    // GET RAIN AVG DATA
-    for (let i = 0; i < rainResponds.length; i++) {
-      rainTotal = rainTotal + rainResponds[i].value
-      const dateState = rainResponds[i].date.split('T')
-
-      if (dateState[0].slice(-2) === ('0' + date.getDate()).slice(-2)) {
         avgRainArr[index - 1] = rainTotal / day
+        avgTempArr[index - 1] = tempTotal / day
+        humidityTotal = 0
         rainTotal = 0
+        tempTotal = 0
         day = 0
         index++
       }
