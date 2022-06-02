@@ -245,6 +245,10 @@ exports.plant_recommendation_detail = async (req, res, next) => {
 
     index = 0
 
+    // VARIABLE FOR PROBABILITY MODEL
+    let probability
+    const modelUrl = 'model-' + ((req.params.plantName).replace(' ', '-'))
+
     // PREPROCESSING DATA
     const avgHumidity = avgHumidityArr.reduce((a, b) => a + b, 0) / avgHumidityArr.length
     const avgRain = avgRainArr.reduce((a, b) => a + b, 0) / avgRainArr.length
@@ -252,6 +256,19 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     const inputData = [avgTemp, avgHumidity, avgRain]
     const scaler = new dfd.StandardScaler()
     const scaledData = scaler.fitTransform(inputData)
+
+    // GET PROBABILITY PLANT MODEL
+    // Array body reques [temperature, humidity, rainfall]
+    await axios.post(`https://plant-model-deploy-sfcizhzcmq-et.a.run.app/v1/models/${modelUrl}:predict`, {
+      instances: [
+        scaledData
+      ]
+    }).then(res => {
+      probability = res.data.predictions[0][0] * 100
+      console.log(probability)
+    }).catch(error => {
+      console.error(error)
+    })
 
     // GET ARRAY AS RESPOND
     for (let i = 0; i < avgHumidityArr.length; i++) {
@@ -279,7 +296,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       data: {
         plant_name: req.params.plantName,
         image_url: fixedPlant.image_url,
-        scaledData,
+        probability,
         location: `${req.query.zone_local}, ${req.query.zone_city}`,
         nearby,
         duration,
