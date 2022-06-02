@@ -186,6 +186,9 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     // VARIABLE NEARBY USER PLANT
     const nearby = userPlant.length
 
+    // VARIABLE FOR MODEL URL
+    const modelUrl = 'model-' + ((req.params.plantName).replace(' ', '-'))
+
     // VARIABLE START AND FINISH DATE
     const date = new Date()
     const startDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
@@ -204,12 +207,13 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     const avgRainArr = []
     const avgTempArr = []
     const avgMonthArr = []
+    const ProbabilitiesArr = []
 
     // VARIABLE FOR INDEX
     let index = 0
     let day = 1
 
-    // GET HUMIDITY DATA
+    // GET GEOSPACIAL DATA
     await axios.get(`https://api.meteomatics.com/${startDate}T00:00:00Z--${harvestDate}T00:00:00Z:PT24H/relative_humidity_max_2m_24h:p,precip_24h:mm,t_mean_2m_24h:C/${req.query.lat},${req.query.long}/json`, {
       auth: {
         username: process.env.METEO_USER,
@@ -223,7 +227,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       console.error(error)
     })
 
-    // GET HUMIDITY, RAIN, TEMPERATURE AVG DATA
+    // GET HUMIDITY, RAIN, TEMPERATURE AVG, AND PROBABILITY DATA
     for (let i = 0; i < humidityResponds.length; i++) {
       humidityTotal = humidityTotal + humidityResponds[i].value
       rainTotal = rainTotal + rainResponds[i].value
@@ -234,6 +238,21 @@ exports.plant_recommendation_detail = async (req, res, next) => {
         avgHumidityArr[index - 1] = humidityTotal / day
         avgRainArr[index - 1] = rainTotal / day
         avgTempArr[index - 1] = tempTotal / day
+        // PREPROCESSING DATA
+        const inputData = [avgTempArr[index - 1], avgHumidityArr[index - 1], avgRainArr[index - 1]]
+        const scaler = new dfd.StandardScaler()
+        const scaledData = scaler.fitTransform(inputData)
+        // GET PROBABILITY PLANT MODEL
+        // Array body reques [temperature, humidity, rainfall]
+        await axios.post(`${process.env.BASE_URL_MODEL}/v1/models/${modelUrl}:predict`, {
+          instances: [
+            scaledData
+          ]
+        }).then(res => {
+          ProbabilitiesArr.push(res.data.predictions[0][0] * 100)
+        }).catch(error => {
+          console.error(error)
+        })
         humidityTotal = 0
         rainTotal = 0
         tempTotal = 0
@@ -243,32 +262,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       day++
     }
 
-    index = 0
-
-    // VARIABLE FOR PROBABILITY MODEL
-    let probability
-    const modelUrl = 'model-' + ((req.params.plantName).replace(' ', '-'))
-
-    // PREPROCESSING DATA
-    const avgHumidity = avgHumidityArr.reduce((a, b) => a + b, 0) / avgHumidityArr.length
-    const avgRain = avgRainArr.reduce((a, b) => a + b, 0) / avgRainArr.length
-    const avgTemp = avgTempArr.reduce((a, b) => a + b, 0) / avgTempArr.length
-    const inputData = [avgTemp, avgHumidity, avgRain]
-    const scaler = new dfd.StandardScaler()
-    const scaledData = scaler.fitTransform(inputData)
-
-    // GET PROBABILITY PLANT MODEL
-    // Array body reques [temperature, humidity, rainfall]
-    await axios.post(`${process.env.BASE_URL_MODEL}/v1/models/${modelUrl}:predict`, {
-      instances: [
-        scaledData
-      ]
-    }).then(res => {
-      probability = res.data.predictions[0][0] * 100
-      console.log(probability)
-    }).catch(error => {
-      console.error(error)
-    })
+    const probability = ProbabilitiesArr.reduce((a, b) => a + b, 0) / ProbabilitiesArr.length
 
     // GET ARRAY AS RESPOND
     for (let i = 0; i < avgHumidityArr.length; i++) {
