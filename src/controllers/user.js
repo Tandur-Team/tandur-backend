@@ -224,7 +224,7 @@ exports.user_add_myplant = async (req, res, next) => {
       zone_city: req.body.zone_city,
       plant_start_date: startDate,
       plant_harvest_date: harvestDate,
-      probability: 0,
+      probability: req.body.probability,
       is_harvested: 0,
       satisfaction_rate: 0,
       image_url: fixedPlant[0].image_url,
