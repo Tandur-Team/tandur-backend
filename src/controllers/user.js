@@ -199,17 +199,25 @@ exports.user_get_detail = async (req, res, next) => {
 // ADD MY PLANT
 exports.user_add_myplant = async (req, res, next) => {
   try {
-    const duration = 3
-
-    const date = new Date()
-    const startDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
-    const harvestDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
-
-    const fixedPlant = await FixedPlants.findAll({
+    const fixedPlant = await FixedPlants.findOne({
       where: {
         plant_name: req.body.plant_name
       }
     })
+
+    const duration = fixedPlant.harvest_duration
+
+    const date = new Date()
+    let startDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
+    let harvestDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
+
+    if (req.body.plant_start_date !== undefined) {
+      startDate = new Date(`${req.body.plant_start_date}T00:00:00Z`)
+    }
+
+    if (req.body.plant_harvest_date !== undefined) {
+      harvestDate = new Date(`${req.body.plant_harvest_date}T00:00:00Z`)
+    }
 
     // convert JSON to String
     const stringMonthlyData = JSON.stringify(req.body.monthly_data)
@@ -227,7 +235,7 @@ exports.user_add_myplant = async (req, res, next) => {
       probability: req.body.probability,
       is_harvested: 0,
       satisfaction_rate: 0,
-      image_url: fixedPlant[0].image_url,
+      image_url: fixedPlant.image_url,
       monthly_data: stringMonthlyData,
       created_at: new Date()
     }
