@@ -191,8 +191,8 @@ exports.plant_recommendation_detail = async (req, res, next) => {
 
     // VARIABLE START AND FINISH DATE
     const date = new Date()
-    const startDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
-    const harvestDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
+    let startDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
+    let harvestDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
 
     // VARIABLE THIRD PARTY API RESPOND
     let humidityResponds
@@ -212,6 +212,14 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     // VARIABLE FOR INDEX
     let index = 0
     let day = 1
+
+    if (req.query.plant_start_date !== undefined) {
+      startDate = req.query.plant_start_date
+    }
+
+    if (req.query.plant_harvest_date !== undefined) {
+      harvestDate = req.query.plant_harvest_date
+    }
 
     // GET GEOSPACIAL DATA
     await axios.get(`https://api.meteomatics.com/${startDate}T00:00:00Z--${harvestDate}T00:00:00Z:PT24H/relative_humidity_max_2m_24h:p,precip_24h:mm,t_mean_2m_24h:C/${req.query.lat},${req.query.long}/json`, {
