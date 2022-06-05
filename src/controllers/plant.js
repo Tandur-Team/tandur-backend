@@ -173,6 +173,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     // QUERY NEARBY PLANTS
     const userPlant = await Plants.findAll({
       where: {
+        plant_name: req.params.plantName,
         zone_local: {
           [Op.like]: `%${req.query.zone_local}%`
         },
@@ -204,7 +205,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
 
     // ARRAY FOR SAVING MONTHLY DATA
     const avgHumidityArr = []
-    const avgRainArr = []
+    const rainArr = []
     const avgTempArr = []
     const avgMonthArr = []
     const ProbabilitiesArr = []
@@ -212,6 +213,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     // VARIABLE FOR INDEX
     let index = 0
     let day = 1
+    let triggerMl = 0
 
     if (req.query.plant_start_date !== undefined) {
       startDate = req.query.plant_start_date
@@ -222,7 +224,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     }
 
     // GET GEOSPACIAL DATA
-    await axios.get(`https://api.meteomatics.com/${startDate}T00:00:00Z--${harvestDate}T00:00:00Z:PT24H/relative_humidity_max_2m_24h:p,precip_24h:mm,t_mean_2m_24h:C/${req.query.lat},${req.query.long}/json`, {
+    await axios.get(`https://api.meteomatics.com/${startDate}T00:00:00Z--${harvestDate}T00:00:00Z:PT24H/relative_humidity_2m:p,precip_24h:mm,t_mean_2m_24h:C/${req.query.lat},${req.query.long}/json`, {
       auth: {
         username: process.env.METEO_USER,
         password: process.env.METEO_PASSWORD
@@ -244,23 +246,26 @@ exports.plant_recommendation_detail = async (req, res, next) => {
 
       if (dateState[0].slice(-2) === ('0' + date.getDate()).slice(-2)) {
         avgHumidityArr[index - 1] = humidityTotal / day
-        avgRainArr[index - 1] = rainTotal / day
+        rainArr[index - 1] = rainTotal
         avgTempArr[index - 1] = tempTotal / day
-        // PREPROCESSING DATA
-        const inputData = [avgTempArr[index - 1], avgHumidityArr[index - 1], avgRainArr[index - 1]]
-        const scaler = new dfd.StandardScaler()
-        const scaledData = scaler.fitTransform(inputData)
-        // GET PROBABILITY PLANT MODEL
-        // Array body reques [temperature, humidity, rainfall]
-        await axios.post(`${process.env.BASE_URL_MODEL}/v1/models/${modelUrl}:predict`, {
-          instances: [
-            scaledData
-          ]
-        }).then(res => {
-          ProbabilitiesArr.push(res.data.predictions[0][0] * 100)
-        }).catch(error => {
-          console.error(error)
-        })
+        if (triggerMl === 1) {
+          // PREPROCESSING DATA
+          const inputData = [avgTempArr[index - 1], avgHumidityArr[index - 1], rainArr[index - 1]]
+          const scaler = new dfd.StandardScaler()
+          const scaledData = scaler.fitTransform(inputData)
+          // GET PROBABILITY PLANT MODEL
+          // Array body reques [temperature, humidity, rainfall]
+          await axios.post(`${process.env.BASE_URL_MODEL}/v1/models/${modelUrl}:predict`, {
+            instances: [
+              scaledData
+            ]
+          }).then(res => {
+            ProbabilitiesArr.push(res.data.predictions[0][0] * 100)
+          }).catch(error => {
+            console.error(error)
+          })
+        }
+        triggerMl = 1
         humidityTotal = 0
         rainTotal = 0
         tempTotal = 0
@@ -276,7 +281,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     for (let i = 0; i < avgHumidityArr.length; i++) {
       const dataMonth = {
         average_humidity: avgHumidityArr[i],
-        average_rain: avgRainArr[i],
+        rain: rainArr[i],
         average_temp: avgTempArr[i]
       }
       avgMonthArr.push(dataMonth)
