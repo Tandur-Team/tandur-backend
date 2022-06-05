@@ -173,6 +173,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
     const date = new Date()
     let startDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
     let harvestDate = date.getFullYear() + '-' + (('0' + (date.getMonth() + 1 + duration)).slice(-2)) + '-' + (('0' + date.getDate()).slice(-2))
+    let dayDate = ('0' + date.getDate()).slice(-2)
 
     // VARIABLE THIRD PARTY API RESPOND
     let humidityResponds
@@ -200,6 +201,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
 
     if (req.query.plant_harvest_date !== undefined) {
       harvestDate = req.query.plant_harvest_date
+      dayDate = ('0' + harvestDate.split('-')[2]).slice(-2)
     }
 
     // GET GEOSPACIAL DATA
@@ -223,7 +225,7 @@ exports.plant_recommendation_detail = async (req, res, next) => {
       tempTotal = tempTotal + tempResponds[i].value
       const dateState = humidityResponds[i].date.split('T')
 
-      if (dateState[0].slice(-2) === ('0' + date.getDate()).slice(-2)) {
+      if (dateState[0].slice(-2) === dayDate) {
         avgHumidityArr[index - 1] = humidityTotal / day
         rainArr[index - 1] = rainTotal
         avgTempArr[index - 1] = tempTotal / day
