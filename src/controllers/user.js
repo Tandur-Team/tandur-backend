@@ -10,6 +10,38 @@ const Plants = require('../models/plant')
 const FixedPlants = require('../models/fixed-plant')
 
 // REGISTER/SIGNUP
+exports.user_email_check = async (req, res, next) => {
+  try {
+    const user = await Users.findAll({
+      where: {
+        email: req.body.email
+      }
+    })
+
+    if (user.length > 0) {
+      return res.status(409).json({
+        message: 'Email already exists',
+        status: 409,
+        data: {
+          email: req.body.email
+        }
+      })
+    } else {
+      return res.status(200).json({
+        message: 'Email is eligible for registration',
+        status: 200
+      })
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Failed',
+      status: 500,
+      error: err.message
+    })
+  }
+}
+
+// REGISTER/SIGNUP
 exports.user_signup = async (req, res, next) => {
   try {
     const user = await Users.findAll({
