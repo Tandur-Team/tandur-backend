@@ -8,83 +8,61 @@ const Op = Sequelize.Op
 // QUERY NEARBY PLANT NAME
 exports.plant_query_name = async (req, res, next) => {
   try {
-    // Grouping Function
-    function groupBy (key) {
-      return function group (array) {
-        return array.reduce((acc, obj) => {
-          const property = obj[key]
-          acc[property] = acc[property] || []
-          acc[property].push(obj)
-          return acc
-        }, {})
-      }
-    }
-
-    // Query Nearby
-    const plants = await Plants.findAll({
+    const fixedPlants = await FixedPlants.findAll({
       where: {
         plant_name: {
           [Op.like]: `%${req.query.search}%`
-        },
-        zone_local: {
-          [Op.like]: `%${req.query.zone_local}%`
-        },
-        zone_city: req.query.zone_city
+        }
       }
     })
 
-    // Grouping by plant_name
-    const groupByName = groupBy('plant_name')
-    const plantNameArr = Object.keys(groupByName(plants))
     const responseArr = []
 
-    // Looping Plant Name
-    for (let i = 0; i < plantNameArr.length; i++) {
-      // Query Fixed Plant by plant_name
-      const fixedPlants = await FixedPlants.findOne({
+    for (let i = 0; i < fixedPlants.length; i++) {
+      const plants = await Plants.findAll({
         where: {
-          plant_name: plantNameArr[i]
+          plant_name: fixedPlants[i].plant_name,
+          zone_local: {
+            [Op.like]: `%${req.query.zone_local}%`
+          },
+          zone_city: req.query.zone_city
         }
       })
 
-      const plantDataArr = groupByName(plants)[plantNameArr[i]]
-      let nearby = 0
       let totalSatisfactionRate = 0
       let harvestedPlantCount = 0
-      let avgSatisfactionRate = 0
 
-      // Looping Plant Data
-      for (let j = 0; j < plantDataArr.length; j++) {
-        if (plantDataArr[j].plant_name === plantNameArr[i]) {
-          nearby++
-          if (plants[j].is_harvested === 1) {
-            totalSatisfactionRate += plants[j].satisfaction_rate
-            harvestedPlantCount++
-          }
-          avgSatisfactionRate = totalSatisfactionRate / harvestedPlantCount
+      for (let j = 0; j < plants.length; j++) {
+        if (plants[j].is_harvested === 1) {
+          totalSatisfactionRate += plants[j].satisfaction_rate
+          harvestedPlantCount++
         }
       }
 
+      const avgSatisfactionRate = totalSatisfactionRate / harvestedPlantCount
+
       const data = {
-        plant_name: plantNameArr[i],
-        image_url: fixedPlants.image_url,
-        nearby,
+        plant_name: fixedPlants[i].plant_name,
+        image_url: fixedPlants[i].image_url,
+        nearby: plants.length,
         avg_satisfaction_rate: avgSatisfactionRate,
-        harvest_duration: fixedPlants.harvest_duration
+        harvest_duration: fixedPlants[i].harvest_duration
       }
 
       responseArr.push(data)
     }
 
-    if (plants.length > 0) {
+    responseArr.sort((a, b) => b.nearby - a.nearby)
+
+    if (responseArr.length > 0) {
       return res.status(200).json({
-        message: 'Query fetched',
+        message: 'Nearby plants fetched',
         status: 200,
         data: responseArr
       })
     } else {
       return res.status(404).json({
-        message: 'Query not found',
+        message: 'Nearby plant not found',
         status: 404
       })
     }
@@ -101,6 +79,7 @@ exports.plant_query_name = async (req, res, next) => {
 exports.plant_get_nearby = async (req, res, next) => {
   try {
     const fixedPlants = await FixedPlants.findAll()
+
     const responseArr = []
 
     for (let i = 0; i < fixedPlants.length; i++) {
