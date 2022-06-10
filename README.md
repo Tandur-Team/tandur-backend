@@ -1,11 +1,24 @@
-# tandur-backend
-## How to Run on Local
-1. Clone the project (git clone https://github.com/Tandur-Team/tandur-backend.git)
-2. Open the project folder on VSCode
-3. Open terminal in VSCode and run "npm install" to install all required dependencies
-4. Run "npm run start" to start the server
-
-## API Endpoint (LOCAL)
+# Tandur Backend
+## Overview
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+## Project Installation
+1. Clone the repository
+```bash
+git clone https://github.com/Tandur-Team/tandur-backend.git
+```
+2. Open the project directory on terminal
+```bash
+cd project_dir
+```
+4. Install all required dependencies
+```bash
+npm install
+```
+4. Start the server
+```bash
+npm run start
+```
+## API Endpoint
 - Register: **POST** ip:port/user/signup
 - Login: **POST** ip:port/user/login
 - User Detail: **GET** ip:port/user/{userId}
@@ -15,5 +28,4 @@
 - Get All Plants: **GET** ip:port/plant
 - Get Plant Detail: **GET** ip:port/plant/{plantId}
 
-*ip = your PC IPv4 address*</br>
-*port = 3000*
+## Testing The Application
