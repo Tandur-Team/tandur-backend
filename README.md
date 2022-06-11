@@ -34,7 +34,7 @@ npm install
 ## Run The Application
 Open Command Prompt/Powershell and type:
 ```bash
-cd project_dir
+cd PROJECT_DIRECTORY
 npm run start
 ```
 
