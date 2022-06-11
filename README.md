@@ -24,7 +24,7 @@ git clone https://github.com/Tandur-Team/tandur-backend.git
 ```
 2. Open the project directory on terminal
 ```bash
-cd project_dir
+cd PROJECT_DIRECTORY
 ```
 4. Install all required dependencies
 ```bash
@@ -59,8 +59,19 @@ npm run start
 8. You should get a JSON response
 
 ## Deploy The Application to Cloud Run (Google Cloud Platform)
-1. asdas
-2. sadasd
+1. Create Artifact Registry
+```bash
+gcloud artifacts repositories create tandur-repo --repository-format=docker --location=asia-southeast2 --description="Tandur docker repository"
+```
+2. Create Cloud Build Triggers
+```bash
+gcloud beta builds triggers create github --repo-name=tandur-repo \
+--repo-owner=YOUR_GITHUB_USERNAME \
+--branch-pattern=^master$ \
+--build-config=cloudbuild.yaml \
+--name=tandur-cicd
+```
+3. Create commit to ``master`` branch to trigger the build, test, and deployment to Cloud Run
 
 [//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
