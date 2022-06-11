@@ -1,14 +1,14 @@
 # Tandur Backend
-[![Platform](https://img.shields.io/github/languages/top/Tandur-Team/tandur-backend)](https://www.javascript.com/)
+[![Platform](https://img.shields.io/github/languages/top/Tandur-Team/tandur-backend)](JavaScript)
 ## Overview
 This repository contains backend application projects used in Tandur mobile application (Android). There are several APIs that we build into multiple endpoints such as User Authentication (Login & Register), Crops/Plants Prediction, and CRUD for My Plants.
 
 We use JavaScript programming language with Node.js environment. For the framework, we use Express because this framework is used to design and build webservice applications (RESTful API) quickly and easily.
 
 ## Requirements
-- Code Editor (Visual Studio Code preffered)
-- NodeJS
-- Postman
+- Code Editor ([Visual Studio Code] prefferable)
+- [Node.js]
+- [Postman]
 
 ## Project Installation
 1. Clone the repository
@@ -50,3 +50,10 @@ npm run start
 6. Add endpoint on the end of base URL, e.g http://127.0.0.1:8080/plant/
 7. Click Send
 8. You should get a JSON response
+
+[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
+
+[JavaScript]: <https://www.javascript.com/>
+[Visual Studio Code]: <https://code.visualstudio.com/>
+[Node.js]: <https://nodejs.org/en/>
+[Postman]: <https://www.postman.com/>
