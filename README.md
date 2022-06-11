@@ -23,11 +23,15 @@ cd project_dir
 ```bash
 npm install
 ```
-4. Start the server
+
+## Run The Application
+Open Command Prompt/Powershell and type:
 ```bash
+cd project_dir
 npm run start
 ```
-## API Endpoint
+
+## API Endpoints
 - Register: **POST** ip:port/user/signup
 - Login: **POST** ip:port/user/login
 - User Detail: **GET** ip:port/user/{userId}
@@ -37,4 +41,12 @@ npm run start
 - Get All Plants: **GET** ip:port/plant
 - Get Plant Detail: **GET** ip:port/plant/{plantId}
 
-## Testing The Application
+## Test The Application
+1. Run the application (Check 'Run The Application' section)
+2. Your application should be running on 127.0.0.1:8080/
+3. Open POSTMAN
+4. Set the method you want to test (Check 'API Endpoints' section), e.g GET
+5. Set http://127.0.0.1:8080/ as the base URL.
+6. Add endpoint on the end of base URL, e.g http://127.0.0.1:8080/plant/
+7. Click Send
+8. You should get a JSON response
