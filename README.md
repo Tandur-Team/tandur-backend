@@ -1,7 +1,9 @@
 # Tandur Backend
 [![Platform](https://img.shields.io/github/languages/top/Tandur-Team/tandur-backend)](https://www.javascript.com/)
 ## Overview
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+This repository contains backend application projects used in Tandur mobile application (Android). There are several APIs that we build into multiple endpoints such as User Authentication (Login & Register), Crops/Plants Prediction, and CRUD for My Plants.
+
+We use JavaScript programming language with Node.js environment. For the framework, we use Express because this framework is used to design and build webservice applications (RESTful API) quickly and easily.
 
 ## Requirements
 - Code Editor (Visual Studio Code preffered)
