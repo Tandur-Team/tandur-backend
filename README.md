@@ -39,14 +39,20 @@ npm run start
 ```
 
 ## API Endpoints
-- Register: **POST** ip:port/user/signup
-- Login: **POST** ip:port/user/login
-- User Detail: **GET** ip:port/user/{userId}
-- Add MyPlant: **POST** ip:port/user/{userId}/plant
-- Get All MyPlants: **GET** ip:port/user/{userId}/plant
-- Harvest MyPlant: **PATCH** ip:port/user/{userId}/plant/{plantId}
-- Get All Plants: **GET** ip:port/plant
-- Get Plant Detail: **GET** ip:port/plant/{plantId}
+- **POST** '/user/signup' : This endpoint allow user to register to the app and save user data to MySQL
+- **POST** '/user/login' : This endpoint allow user to login and get the Bearer token response for the apps.
+- **POST** '/user/email_check' : This endpoint allow user to login and get the Bearer token for the apps.
+- **GET** '/user/' : This endpoint response all users list with JSON format.
+- **GET** '/user/<user_id>' : This endpoint response user details with JSON format.
+- **POST** '/user/<user_id>/plant' : This endpoint allow user to create My Plants.
+- **GET** '/user/<user_id>/plant' : This endpoint response all My Plants list with JSON format.
+- **GET** '/user/<user_id>/plant/search?search=<query_search>' : This endpoint response queried My Plants with JSON format.
+- **GET** '/user/<user_id>/plant/<plant_id>' : This endpoint response My Plant details with JSON format.
+- **PATCH** '/user/<user_id>/plant/<plant_id>' : This endpoint update 'is_harvested' to TRUE.
+- **GET** '/plant/?zone_local=<kecamatan>&zone_city=<kota>' : This endpoint response nearby plants list with JSON format.
+- **GET** '/plant/search?search=<query_search>&zone_local=<kecamatan>&zone_city=<kota>' : This endpoint response queried nearby plants list with JSON format.
+- **GET** '/plant/<plant_name>?zone_local=<kecamatan>&zone_city=<kota>&lat=<lat>long=<log>' : This endpoint response plant survival rate prediction.
+- **GET** '/weather/?lat=<lat>&long=<long> : This endpoint response current weather.
 
 ## Test The Application
 1. Run the application (Check 'Run The Application' section)
